@@ -33,8 +33,6 @@ As análises destinam-se a websites próprios ou com autorização para teste. N
 
 ## Referência
 
-Projeto inspirado no WebSec Check, fornecido ao grupo em ZIP: https://github.com/MRDACC/Engenharia_Software_Websec-Check
-
 O projeto de referência utiliza FastAPI, Next.js e SQLite. As tecnologias do WebSec AI serão decididas pelo grupo. Este repositório contém a definição inicial; eventual reutilização de código deverá confirmar a licença e identificar a origem.
 
 ## WBS inicial
