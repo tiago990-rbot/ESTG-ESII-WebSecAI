@@ -36,7 +36,6 @@ As análises destinam-se a websites próprios ou com autorização para teste. N
 O projeto de referência utiliza FastAPI, Next.js e SQLite. As tecnologias do WebSec AI serão decididas pelo grupo. Este repositório contém a definição inicial; eventual reutilização de código deverá confirmar a licença e identificar a origem.
 
 ## Tecnologias Utilizadas
-## Tecnologias propostas
 
 - **Frontend:** Next.js, React e TypeScript para a interface web.
 - **Backend:** Python e FastAPI para a API e as verificações de segurança.
