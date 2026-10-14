@@ -1,4 +1,4 @@
-# WebSec AI
+# WebSecAI
 
 Projeto Engenharia de Software II 
 
