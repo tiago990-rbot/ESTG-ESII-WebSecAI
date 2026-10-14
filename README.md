@@ -1,6 +1,6 @@
 # WebSec AI
 
-Projeto académico de Engenharia de Software II — ESTG.
+Projeto Engenharia de Software II 
 
 ## Participantes
 
@@ -21,7 +21,7 @@ O projeto está na fase de definição. As funcionalidades seguintes são propos
 - Painel de resultados com evidências e recomendações.
 - Registo, autenticação e histórico por utilizador.
 - Exportação de relatórios.
-- IA para explicar resultados técnicos em linguagem simples e sugerir prioridades de melhoria.
+- Possível integração de um MCP para permitir que assistentes de inteligência artificial consultem os resultados e o histórico das análises de segurança web.
 
 ### Papel da IA
 
