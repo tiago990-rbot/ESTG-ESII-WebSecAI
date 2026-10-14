@@ -35,6 +35,21 @@ As análises destinam-se a websites próprios ou com autorização para teste. N
 
 O projeto de referência utiliza FastAPI, Next.js e SQLite. As tecnologias do WebSec AI serão decididas pelo grupo. Este repositório contém a definição inicial; eventual reutilização de código deverá confirmar a licença e identificar a origem.
 
+## Tecnologias Utilizadas
+## Tecnologias propostas
+
+- **Frontend:** Next.js, React e TypeScript para a interface web.
+- **Backend:** Python e FastAPI para a API e as verificações de segurança.
+- **Base de dados:** SQLite e SQLAlchemy para guardar utilizadores, análises e resultados.
+- **Inteligência artificial:** API de um modelo de linguagem, a definir, para explicar resultados e sugerir melhorias.
+- **MCP opcional:** SDK oficial MCP para Python para permitir a consulta de resultados e histórico por assistentes de IA.
+- **Relatórios:** ReportLab para gerar relatórios em PDF.
+- **Testes:** pytest para testar o backend e as verificações.
+- **Gestão do projeto:** GitHub para o código e GitHub Projects para as tarefas.
+
+As tecnologias apresentadas constituem uma proposta inicial,
+sujeita a validação pelo grupo durante a definição da arquitetura.
+
 ## WBS inicial
 
 A WBS divide o trabalho em entregáveis e tarefas. Responsáveis e datas serão acordados pelo grupo no GitHub Project.
