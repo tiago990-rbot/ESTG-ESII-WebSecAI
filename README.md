@@ -46,9 +46,6 @@ O projeto de referência utiliza FastAPI, Next.js e SQLite. As tecnologias do We
 - **Testes:** pytest para testar o backend e as verificações.
 - **Gestão do projeto:** GitHub para o código e GitHub Projects para as tarefas.
 
-As tecnologias apresentadas constituem uma proposta inicial,
-sujeita a validação pelo grupo durante a definição da arquitetura.
-
 ## WBS inicial
 
 A WBS divide o trabalho em entregáveis e tarefas. Responsáveis e datas serão acordados pelo grupo no GitHub Project.
@@ -73,7 +70,3 @@ A WBS divide o trabalho em entregáveis e tarefas. Responsáveis e datas serão 
 | 5.3 | Integração | Validar fluxos, permissões e funcionamento sem IA disponível. |
 | 6.1 | Documentação | Preparar instruções de execução, utilização e limitações. |
 | 6.2 | Entrega | Preparar demonstração e verificar requisitos do docente. |
-
-## Planeamento
-
-O GitHub Project terá o mesmo nome do repositório: ESTG-ESII-WebSecAI. Cada tarefa deverá identificar o código WBS, descrição, critérios de conclusão, responsável e prazo acordado.
