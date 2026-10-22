@@ -1,5 +1,6 @@
 """Connection policy shared by the application and Alembic; never log URLs."""
 import certifi
+import shlex
 from sqlalchemy import create_engine
 from sqlalchemy.engine import make_url
 from sqlalchemy.pool import NullPool
@@ -9,6 +10,18 @@ from app.core.config import ROOT, value
 def database_url(raw=None):
     raw = raw if raw is not None else value("DATABASE_URL", "sqlite:///" + (ROOT / "websec_check.db").as_posix())
     try:
+        # Neon offers both a URL and a quoted psql snippet. Parse text only;
+        # never execute commands or include connection data in an exception.
+        if isinstance(raw, str):
+            raw = raw.strip()
+            if raw.startswith(("psql ", "psql\t", "'", '"')):
+                parts = shlex.split(raw)
+                if len(parts) == 2 and parts[0] == "psql":
+                    raw = parts[1]
+                elif len(parts) == 1 and not raw.startswith("psql"):
+                    raw = parts[0]
+                else:
+                    raise ValueError("Expected one connection URL")
         url = make_url(raw)
     except Exception:
         raise RuntimeError("URL da base inválida; reveja a configuração privada.") from None

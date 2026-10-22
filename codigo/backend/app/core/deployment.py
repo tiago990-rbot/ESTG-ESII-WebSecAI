@@ -28,8 +28,8 @@ def validate_deployment():
     if database_url().get_backend_name() != "postgresql":
         raise RuntimeError("A instalação online exige PostgreSQL persistente.")
     migration_url()
-    if len(allowed_emails()) != 3:
-        raise RuntimeError("Configure os três emails autorizados em APP_ALLOWED_EMAILS.")
+    if not 1 <= len(allowed_emails()) <= 3:
+        raise RuntimeError("Configure entre um e três emails autorizados em APP_ALLOWED_EMAILS.")
     origins = [x.strip() for x in value("CORS_ORIGINS").split(",")]
     if not origins or any(urlsplit(x).scheme != "https" or not urlsplit(x).hostname or urlsplit(x).path not in {"", "/"} or "*" in x for x in origins):
         raise RuntimeError("Configure CORS_ORIGINS com a origem HTTPS exata da interface.")

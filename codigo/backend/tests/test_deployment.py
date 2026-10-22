@@ -31,7 +31,24 @@ def test_remote_connections_verify_certificate_and_use_psycopg(monkeypatch):
         migration_url()
 
 
-def test_online_cannot_start_on_sqlite_or_without_three_members(monkeypatch):
+@pytest.mark.parametrize("wrapper", ["{}", "'{}'", '"{}"', "psql '{}'", 'psql "{}"'])
+def test_neon_connection_snippets_are_parsed_without_shell_execution(wrapper):
+    raw = "postgresql://synthetic:synthetic@ep-example.neon.tech/test?sslmode=require&channel_binding=require"
+    url = database_url(wrapper.format(raw))
+    assert url.host == "ep-example.neon.tech" and url.database == "test"
+    assert url.query["sslmode"] == "verify-full"
+    assert url.query["channel_binding"] == "require"
+
+
+def test_invalid_connection_snippets_do_not_disclose_credentials():
+    for raw in ("psql 'postgresql://synthetic:private-value@ep-example.neon.tech/test' --extra", "psql 'private-value"):
+        with pytest.raises(RuntimeError) as exc:
+            database_url(raw)
+        assert "private-value" not in str(exc.value)
+        assert "ep-example" not in str(exc.value)
+
+
+def test_online_requires_postgres_and_one_to_three_authorized_members(monkeypatch):
     monkeypatch.setenv("APP_ENV", "production")
     with pytest.raises(RuntimeError):
         deployment.validate_deployment()
@@ -40,13 +57,18 @@ def test_online_cannot_start_on_sqlite_or_without_three_members(monkeypatch):
     monkeypatch.setenv("CORS_ORIGINS", "https://websecai.example.workers.dev")
     with pytest.raises(RuntimeError):
         deployment.validate_deployment()
-    monkeypatch.setenv("APP_ALLOWED_EMAILS", "alice@example.com,bob@example.com,carol@example.com")
-    deployment.validate_deployment()
+    for members in ("alice@example.com", "alice@example.com,bob@example.com", "alice@example.com,bob@example.com,carol@example.com"):
+        monkeypatch.setenv("APP_ALLOWED_EMAILS", members)
+        deployment.validate_deployment()
+    monkeypatch.setenv("APP_ALLOWED_EMAILS", "alice@example.com,bob@example.com,carol@example.com,dave@example.com")
+    with pytest.raises(RuntimeError):
+        deployment.validate_deployment()
 
 
-def test_public_registration_closed_and_existing_nonmember_denied(client, accounts, monkeypatch):
+@pytest.mark.parametrize("members", ["bob@example.com", "bob@example.com,carol@example.com,dave@example.com"])
+def test_public_registration_closed_and_existing_nonmember_denied(client, accounts, monkeypatch, members):
     monkeypatch.setenv("APP_ENV", "production")
-    monkeypatch.setenv("APP_ALLOWED_EMAILS", "bob@example.com,carol@example.com,dave@example.com")
+    monkeypatch.setenv("APP_ALLOWED_EMAILS", members)
     response = client.post("/api/v1/auth/register", json={"username": "carol", "email": "carol@example.com", "password": "synthetic-password"})
     assert response.status_code == 403
     assert client.get("/api/v1/users/me", headers=accounts[0]).status_code == 403

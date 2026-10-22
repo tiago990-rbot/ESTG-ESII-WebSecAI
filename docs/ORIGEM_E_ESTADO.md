@@ -17,3 +17,5 @@ Faltam a configuração humana de segredos, os testes na branch de validação N
 Os relatórios desta preparação encontram-se em `VALIDACAO_URLHAUS.md` e `VALIDACAO_PUBLICACAO.md`. As referências a ausência de push descrevem a etapa anterior ao envio desta integração; registar os commits e IDs de deploy efetivos quando realizados.
 
 Integração enviada: `e926bd4a323b68978475a83bf8cc797cd1c5c690`, árvore `ed39e523a1bca8acdf07c2e07900e944b4df181b`; comparação remota exata. Revisão: https://github.com/tiago990-rbot/ESTG-ESII-WebSecAI/pull/19 . O commit posterior de documentação regista este checkpoint; não altera o código testado.
+
+Correção seguinte: acesso inicial com um a três emails, por instrução humana; leitura segura de snippets Neon com aspas/psql. Fonte local `8d8cf77199ee0bfc31b4bd5ac610a8c55a524053`; 113 testes aprovados em PostgreSQL real. Primeiro deploy Render falhou por formato de URL; nova aceitação remota pendente.
