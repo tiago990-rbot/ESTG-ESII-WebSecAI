@@ -1,0 +1,33 @@
+# Prepared configuration only. The person selects the group account/repository first.
+# Paths assume this package root is the repository root; adjust when integrating.
+services:
+  - type: web
+    name: websecai-api
+    runtime: docker
+    plan: free
+    region: ohio
+    numInstances: 1
+    autoDeployTrigger: "off"
+    dockerfilePath: ./codigo/backend/Dockerfile
+    dockerContext: ./codigo/backend
+    healthCheckPath: /health
+    maxShutdownDelaySeconds: 120
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_ALLOWED_EMAILS
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_MIGRATION_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: ALLOW_DEMO
+        value: "true"
+      - key: SEARCH_MONTHLY_LIMIT
+        value: "0"
+      - key: AI_DAILY_LIMIT
+        value: "0"
