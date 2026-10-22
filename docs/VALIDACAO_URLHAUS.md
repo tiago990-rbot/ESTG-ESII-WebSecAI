@@ -18,7 +18,7 @@
 
 - Código do ZIP v2, sem usar o GitHub como base. Manifesto original: 138 ficheiros verificados, zero diferenças.
 - SHA-256 do ZIP: `df9059a722c9b426fb573ba8f1b5bb801009d7ebaa8e7672abf19da0a53fde63`.
-- Revisão local preparada: `38b3c378ee1ad002850e1a2bf5cb7843ab0b2252`, ramo `codex/publicacao-gratuita`.
+- Revisão local preparada: `8d8cf77199ee0bfc31b4bd5ac610a8c55a524053`, ramo `codex/publicacao-gratuita`.
 - Windows, Python 3.12.14, httpx 0.28.1. Verificação inicial isolada em `2026-10-22T12:57:22.511555+00:00`: chave ausente, zero pedidos.
 - A conversa partilhada não abriu no assistente. Foram usados os documentos do ZIP.
 
@@ -56,3 +56,5 @@ O script apresenta apenas UTC, presença de configuração, estado, mensagem seg
 A suite recebida passou com 98 testes antes de alterações. Após adaptação: 105 aprovados/1 omitido em SQLite e 106 aprovados em PostgreSQL local real. Os novos testes do comando URLhaus provaram, com respostas controladas, a reserva máxima de duas tentativas, a ausência da chave na saída e a distinção entre `no_results` interpretável e HTTP 404. O adaptador original não precisou de alteração.
 
 Falta: configuração humana, até duas consultas reais no total, registo UTC/estado/contagem dos pedidos efetivos e confirmação das condições da conta. Nenhum teste externo Tavily/Groq foi realizado ou autorizado por inferência.
+
+Revisão final de regressão: 113 testes aprovados em PostgreSQL local. A publicação remota não acrescentou consultas URLhaus: mantém-se zero.
