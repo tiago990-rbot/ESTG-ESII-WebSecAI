@@ -2,12 +2,16 @@
 
 ## Estado real
 
-**Preparação e testes locais concluídos; aplicação ainda não publicada.** O assistente não criou recursos, enviou ficheiros para um remoto, ativou planos pagos, comprou domínios ou criou automações. O projeto Neon WebSecCheckAI foi identificado na lista autenticada de projetos (AWS Ohio). A confirmação do plano nessa conta, os destinos Cloudflare/Render e o repositório/ramo autorizado continuam pendentes; a pessoa está a criar as restantes contas. A pessoa aprovou Render Free nesta conversa, sem cartão nem extras. Falta identificar o workspace/projeto.
+**Código enviado para o GitHub; testes locais concluídos; aplicação ainda não publicada.** Conta GitHub `tiago990-rbot` confirmada pela CLI. A revisão de integração `e926bd4a323b68978475a83bf8cc797cd1c5c690` está no [ramo autorizado](https://github.com/tiago990-rbot/ESTG-ESII-WebSecAI/tree/codex/publicacao-gratuita), com [PR #19 em rascunho](https://github.com/tiago990-rbot/ESTG-ESII-WebSecAI/pull/19). A árvore de ficheiros e o commit remotos coincidem com o snapshot local; não houve force-push nem alteração de main.
+
+Neon `WebSecCheckAI` (`morning-smoke-38536704`), AWS Ohio: plano **Free / $0** confirmado. Foi criada a branch **websecai-validacao** (`br-withered-bonus-b5nrod3w`), com esquema apenas, sem copiar dados do ramo original e sem expiração automática. A branch original `production` foi preservada. Não foram lidas ligações privadas nem feitas migrações ou testes remotos.
+
+Cloudflare: conta com subdomínio `tmelo1715.workers.dev` confirmada; a aplicação existente foi preservada. Nenhum Worker WebSecAI publicado. Render: `Tiago's workspace`, formulário de um único serviço `websecai-api` preparado com **Free / $0**, 0.1 CPU, 512 MB RAM, Ohio, Docker, ramo `codex/publicacao-gratuita`, pasta `codigo/backend`, contexto `.`, Dockerfile `./Dockerfile`, health `/health`, deploy automático **Off**. O serviço ainda não foi criado: faltam quatro valores privados introduzidos pela pessoa. Não foram ativados planos pagos, meios de pagamento, domínios, extras ou automações.
 
 | Componente | Comprovado | Ainda pendente |
 | --- | --- | --- |
 | FastAPI/SQLite local | Instalação e regressão | — |
-| PostgreSQL | Migrações e suite num servidor local real | Neon, TLS remoto e pooler reais |
+| PostgreSQL | Migrações e suite locais; branch Neon Free isolada criada | TLS remoto, pooler, migrações e aceitação reais |
 | Interface Cloudflare | Bundle OpenNext e navegador no workerd local | Deploy Free, limites e métricas reais |
 | Backend Cloudflare Python | Documentação e análise de compatibilidade | Nenhum teste de runtime/implantação completo |
 | Backend CPython tradicional | API local com PostgreSQL | Execução no Render, Docker Linux e cold start remoto |
@@ -20,7 +24,7 @@ URL público da interface: **não existe ainda**. URL público da API: **não ex
 - Base: ZIP `WebSecAI_Continuacao_2026-10-22_v2.zip`, SHA-256 `df9059a722c9b426fb573ba8f1b5bb801009d7ebaa8e7672abf19da0a53fde63`.
 - `MANIFEST_SHA256.json` original preservado, SHA-256 `c2d35dec720e28ac1737b01b498a1c79032c54aef2067cb10bf57c4688ede490`. Os 138 ficheiros corresponderam ao manifesto.
 - Commit-base local: `8a83f2d`; revisão preparada: `38b3c378ee1ad002850e1a2bf5cb7843ab0b2252`.
-- Ramo local: `codex/publicacao-gratuita`. Sem push. A conversa partilhada não abriu; os documentos do pacote forneceram o contexto.
+- Ramo remoto: `codex/publicacao-gratuita`, integração `e926bd4a323b68978475a83bf8cc797cd1c5c690`, PR #19. Código enviado com a API oficial GitHub através da CLI autenticada, sem ler tokens. A conversa partilhada não abriu; os documentos do pacote forneceram o contexto.
 - Ambiente efetivo: Windows, Python 3.12.14, Node 24.19.0, npm 12.2.1, PostgreSQL 18.4 local (binários de teste `@embedded-postgres/windows-x64` 18.4.0-beta.17), psycopg 3.3.6, SQLAlchemy 2.1.5, Alembic 1.20.0, Next.js 15.5.28, React 18.3.1, OpenNext Cloudflare 1.20.13, Wrangler 4.151.3/workerd 1.20261019.1.
 
 ## Alterações preparadas
@@ -66,13 +70,13 @@ A [Cloudflare documenta FastAPI em Python Workers](https://developers.cloudflare
 
 O hash atual usa 600 000 iterações. Uma medição CPython local consumiu 375 ms de CPU; **não é uma medição em Workers**. Comparada com o teto Free de 10 ms, indica risco material. Não se reduziu o hash nem se declarou Python genericamente impossível na Cloudflare.
 
-Arquitetura aprovada pela pessoa nesta conversa: **Cloudflare Workers Free para interface, Render Web Service Free para FastAPI e Neon Free para dados**. Mantém o processo Python convencional. Ainda não foi criado ou identificado um projeto Render. Se a pessoa preferir insistir no backend Workers, é necessária uma prova específica antes da publicação; o bundle frontend aprovado não resolve esse trabalho.
+Arquitetura aprovada pela pessoa nesta conversa: **Cloudflare Workers Free para interface, Render Web Service Free para FastAPI e Neon Free para dados**. Mantém o processo Python convencional. O workspace Render foi identificado e o formulário Free preparado; o serviço ainda não foi criado. Se a pessoa preferir insistir no backend Workers, é necessária uma prova específica antes da publicação; o bundle frontend aprovado não resolve esse trabalho.
 
 ## Passos humanos e publicação, por ordem
 
-1. Identificar nomes das contas/projetos Neon/Cloudflare, repositório e ramo autorizado. Render Free para o backend já foi autorizado, sem cartão nem extras. Fazer logins pessoalmente; não enviar credenciais ao modelo.
-2. Integrar o patch numa cópia/ramo e executar os testes. Escolher um commit de integração exato; a revisão preparada não deve substituir alterações do grupo silenciosamente.
-3. No Neon Free, criar/selecionar primeiro uma base vazia de validação, separada da instalação do grupo. A pessoa guarda as URLs pooled/direta privadamente nos ambientes apropriados. Não importar a base pessoal do colega. Testar TLS/pooler/migrações e a demonstração nesse destino antes de usar a base final.
+1. Contas/projetos Neon/Cloudflare/Render, repositório e ramo já identificados e autorizados. Render Free para o backend já foi autorizado, sem cartão nem extras. Fazer logins pessoalmente; não enviar credenciais ao modelo.
+2. Integração enviada para o ramo de publicação e PR #19. Revisão de código `e926bd4a323b68978475a83bf8cc797cd1c5c690`; código/helper comparados com o snapshot testado. O README inicial está em `docs/README_INICIAL_GITHUB.md`; main permanece intacto para revisão.
+3. A branch isolada Neon Free `websecai-validacao` já foi criada com esquema apenas, separada do ramo original. Selecionar esta branch no painel Connect para a validação inicial. A pessoa guarda as URLs pooled/direta privadamente nos ambientes apropriados. Não importar a base pessoal do colega. Testar TLS/pooler/migrações e a demonstração nesse destino antes de usar a base final.
 4. Com Render Free já autorizado: criar um único Web Service Free no repositório autorizado, diretório `codigo/backend`. Opção Docker com o Dockerfile fornecido; alternativa de runtime Python 3.12.14, build `pip install -r requirements.txt`, start `python scripts/start_hosted.py`. Confirmar Free antes de criar. Não criar Render Postgres, Redis, cron, disco pago ou worker adicional. A base persistente continua no Neon.
 5. A própria pessoa configura no painel do backend `APP_ENV=production`, `APP_ALLOWED_EMAILS` (três emails), `DATABASE_URL` pooled, `DATABASE_MIGRATION_URL` direta, `JWT_SECRET` aleatório estável, `CORS_ORIGINS` com a origem HTTPS exata da interface e `ALLOW_DEMO=true`. Não copiar o `.env` para o repositório ou imagem. Manter `SEARCH_MONTHLY_LIMIT=0` e `AI_DAILY_LIMIT=0` enquanto não houver pequeno orçamento humano para testes externos. Chaves opcionais podem continuar ausentes.
 6. Para provisionar as contas, a pessoa prepara `.env.production` privada em `codigo/backend` com a configuração do destino e executa `python scripts/provision_group.py` no seu terminal. As passwords são introduzidas por getpass. Não executar isto através do assistente nem enviar o ficheiro. A conta do docente/grupo no Neon não substitui as contas WebSecAI.
@@ -98,7 +102,7 @@ Sem SLA ou disponibilidade contínua prometida. Ao atingir limites, suspender/re
 
 ## Revisão online e rollback
 
-Antes do primeiro deploy, comparar o patch/manifesto e registar o commit de integração no painel de cada alojamento. A interface e a API têm de apontar à mesma revisão compatível; registar URLs e IDs de deploy neste relatório. Nenhuma revisão está online neste momento.
+Antes do primeiro deploy, comparar o patch/manifesto e registar o commit de integração no painel de cada alojamento. A interface e a API têm de apontar à mesma revisão compatível; registar URLs e IDs de deploy neste relatório. O código está acessível no GitHub no ramo/PR acima; ainda não há uma revisão da aplicação executada online. Alterações posteriores apenas aos relatórios não substituem os testes do código dessa revisão.
 
 Para cada alteração futura, combinar uma janela com o grupo e aguardar pelo fim dos trabalhos antes de publicar. Um worker/instância CPython inicialmente; não escalar horizontalmente. O semáforo é local e a recuperação marca trabalhos globalmente, incluindo risco de sobreposição entre processos durante rollout. Uma interrupção preserva evidências e permite repetição seletiva; não garante conclusão nem deve repetir pedidos externos automaticamente.
 
