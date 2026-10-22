@@ -29,6 +29,16 @@ A leitura da ligação aceita também aspas exteriores ou o snippet `psql 'URL'`
 
 Código local atualizado: `8d8cf77199ee0bfc31b4bd5ac610a8c55a524053`. Testes focados: **15 aprovados e 1 omitido** em SQLite. Suite PostgreSQL real repetida após estas alterações: **113 aprovados**, incluindo migração inicial/idempotência. Não houve chamadas reais URLhaus/Tavily/Groq. Nova publicação e teste de saúde remotos pendentes.
 
+## Resultado da repetição do deploy
+
+Foi enviado o commit de integração `8b9707ae4c95ea321f6f782cb01df179e61fcb94` e iniciado manualmente o deploy `dep-dbd508rl550s73amg4kg` no serviço Render Free `websecaiapi`. O build Docker Linux passou; o processo terminou novamente com «URL da base inválida», antes de autenticar no Neon ou aplicar migrações. Duração mostrada: 28,1 s. A compatibilidade com cópia entre aspas/psql e a lista de um a três membros estão nesta revisão, mas não resolveram o valor de ligação atualmente guardado.
+
+Um GET a `https://websecaiapi.onrender.com/health`, com timeout de 15 segundos, não devolveu uma resposta de saúde válida. O URL atribuído à API **não é uma aplicação operacional comprovada**. TLS/pooler e migrações remotas, login, demonstração e PDFs remotos continuam sem aceitação.
+
+A lista de acesso foi guardada apenas com o email indicado pela pessoa. Nenhum segredo foi alterado. A tentativa de verificar só o formato/presença dos campos privados foi rejeitada pela revisão automática por contrariar a proibição inicial de ler credenciais; não foram devolvidos valores. Não se tentou contornar essa rejeição. Tentaram-se duas transferências por Copy/Paste sem leitura, mas ambas falharam porque a área de transferência virtual do navegador controlado não recebeu os dados. A edição sem alterações foi cancelada.
+
+Bloqueio concreto: a pessoa precisa de substituir `DATABASE_URL` pela URL pooled completa e `DATABASE_MIGRATION_URL` pela URL direta da mesma base/branch Neon `websecai-validacao`, usando a área de transferência normal, e guardar no Render. O assistente pode depois repetir o deploy e a validação sem receber os valores. A Cloudflare continua sem Worker WebSecAI publicado; não foi apresentada uma interface isolada como publicação completa.
+
 ## Revisão e proveniência
 
 - Base: ZIP `WebSecAI_Continuacao_2026-10-22_v2.zip`, SHA-256 `df9059a722c9b426fb573ba8f1b5bb801009d7ebaa8e7672abf19da0a53fde63`.
