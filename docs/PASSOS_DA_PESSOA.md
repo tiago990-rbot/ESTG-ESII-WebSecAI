@@ -1,5 +1,11 @@
 # Passos privados da pessoa — instalação online
 
+## CORS corrigido e confirmado — 2026-10-22T23:29:02.087594+00:00
+
+Depois da correção humana e do deploy Render `dep-dbd9npbrjlhs73cgrctg`, a verificação remota confirmou: novo /login HTTP 200, API /health HTTP 200/status ok, preflight da origem nova HTTP 200 com a origem exata e origem antiga HTTP 400 sem autorização. O bloqueio CORS descrito nos registos anteriores está resolvido. Nenhuma credencial foi consultada e nenhuma chamada a fornecedores foi feita. Ainda faltam confirmar provisionamento, login e aceitação remota autenticada; o consumo CPU Cloudflare mantém-se pendente.
+
+## Registo anterior, anterior à correção acima
+
 ## Primeiro: corrigir a ligação da interface
 
 O novo link é https://websecai-frontend.websecai-estg.workers.dev/login. Abre, mas a API ainda aceita apenas a origem anterior. No Render, websecaiapi → Environment → Edit, guardar:

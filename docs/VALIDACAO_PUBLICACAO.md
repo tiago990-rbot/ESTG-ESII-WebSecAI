@@ -1,5 +1,11 @@
 # Validação da publicação — 23/10/2026 (Portugal)
 
+## CORS corrigido e confirmado — 2026-10-22T23:29:02.087594+00:00
+
+Depois da correção humana e do deploy Render `dep-dbd9npbrjlhs73cgrctg`, a verificação remota confirmou: novo /login HTTP 200, API /health HTTP 200/status ok, preflight da origem nova HTTP 200 com a origem exata e origem antiga HTTP 400 sem autorização. O bloqueio CORS descrito nos registos anteriores está resolvido. Nenhuma credencial foi consultada e nenhuma chamada a fornecedores foi feita. Ainda faltam confirmar provisionamento, login e aceitação remota autenticada; o consumo CPU Cloudflare mantém-se pendente.
+
+## Registo anterior, anterior à correção acima
+
 ## Resultado atual
 
 A interface foi publicada em **https://websecai-frontend.websecai-estg.workers.dev** e a API em **https://websecaiapi.onrender.com**. A base persistente é PostgreSQL no Neon Free. **A aceitação online completa está pendente:** o novo endereço abre, mas a API ainda permite a origem antiga; faltam confirmar provisionamento/login individual, demonstração/PDF remotos e acesso dos colegas. Não declarar a instalação concluída só porque o deploy está Live.
@@ -13,8 +19,8 @@ A alteração de toda a conta Workers de tmelo1715.workers.dev para websecai-est
 | Novo `/login` | HTTP 200, 2026-10-22T23:09:52Z; também aberto no navegador |
 | API `/health` | HTTP 200, status ok |
 | API sem autenticação | 401 no ensaio remoto anterior |
-| CORS novo endereço | **400, sem Access-Control-Allow-Origin: correção pendente** |
-| CORS endereço antigo | 200, ainda reflete a origem antiga |
+| CORS novo endereço (ensaio anterior) | 400 antes da correção; **200 no ensaio final acima** |
+| CORS endereço antigo (ensaio anterior) | 200 antes da correção; **400 no ensaio final acima** |
 | Após horas de inatividade | `/health` 200 em 22,52 s às 22:27:17Z; uma observação, sem SLA |
 | Rotas interface, antes da mudança do nome | `/`, `/login`, `/about`, `/history/[id]`, `/investigations/[id]` responderam 200, sem erro 1102; IDs fictícios, sem prova de acesso a dados |
 | Login/demonstração/PDF dos utilizadores reais | Não confirmados |
