@@ -51,7 +51,7 @@ try {
     await page.waitForURL(/\/investigations\/[a-f0-9-]+$/);
     await page.getByText("Concluída", { exact: true }).waitFor();
     await page.getByRole("tab", { name: /^Evidências/ }).click();
-    assert.equal(await page.locator(".evidenceItem").count(), 4);
+    assert.equal(await page.locator(".evidenceItem").count(), 7);
     await page.locator(".demoBanner").waitFor();
     if (i === 0) demoId = new URL(page.url()).pathname.split("/").at(-1);
     const downloading = page.waitForEvent("download");
@@ -71,6 +71,12 @@ try {
     await page.getByRole("button", { name: /Examinar E2/ }).click();
     await page.waitForURL(/#evidence-/);
     assert.equal(await page.getByRole("tab", { name: /^Evidências/ }).getAttribute("aria-selected"), "true");
+    await page.getByRole("tab", { name: "Assistente IA", exact: true }).click();
+    await page.getByRole("heading", { name: "Perguntas essenciais", exact: true }).waitFor();
+    assert.equal(await page.locator(".wb-answer").count(), 6);
+    await page.locator(".wb-answer summary").filter({ hasText: "O histórico e a configuração atual estão relacionados?" }).click();
+    assert.equal(await page.locator(".wb-answer[open]").count(), 1);
+    await page.getByRole("tab", { name: /^Evidências/ }).click();
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: path.join(out, "demo-mobile-" + i + ".png") });
@@ -82,7 +88,7 @@ try {
   const result = { utc: new Date().toISOString(), mode: process.env.TEST_RUNTIME || "local_next_api_postgresql", synthetic_accounts: 3,
     demo_evidence_and_pdf: true, individual_authorization: true, reload_persistence: true,
     mobile_390: true, timeline_graph_keyboard_and_evidence_navigation: true,
-    production_api_redirected_to_offline_fixture: true,
+    production_api_redirected_to_offline_fixture: true, structured_intelligence_demo: true,
     dynamic_investigation_and_history_routes: true, browser_errors: 0, external_browser_requests: 0 };
   await fs.writeFile(path.join(out, "deployment-browser.json"), JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));

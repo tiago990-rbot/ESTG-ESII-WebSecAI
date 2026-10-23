@@ -4,7 +4,15 @@ export type Provider = { id: string; name: string; configured: boolean; purpose:
 export type ProviderRun = { provider: string; status: string; message: string; results_count: number; observed_at: string };
 export type Evidence = { id: string; provider: string; category: string; title: string; description: string; source_url: string; confirmation: string; published_at: string | null; event_at: string | null; observed_at: string; meta: Record<string, unknown> };
 export type Claim = { text: string; evidence_ids: string[] };
-export type AnalystReport = { summary: string; observations: Claim[]; recommendations: Claim[]; limitations: string[] };
+export type Confidence = "low" | "medium" | "high";
+export type IntelligenceAnalysis = {
+  conclusions: (Claim & { kind: "observation" | "inference" | "hypothesis"; confidence: Confidence; caveat: string })[];
+  correlations: (Claim & { kind: "contextual_link" | "possible_link" | "contradiction"; confidence: Confidence; caveat: string })[];
+  questions: { key: "history" | "identity" | "current_signals" | "technical" | "correlation" | "priorities"; answer: string; assessment: "supported" | "hypothesis" | "insufficient"; confidence: Confidence; evidence_ids: string[]; caveat: string }[];
+  actions: { priority: "P1" | "P2" | "P3"; action: string; reason: string; validation: string; evidence_ids: string[] }[];
+  gaps: string[];
+};
+export type AnalystReport = { summary: string; observations: Claim[]; recommendations: Claim[]; limitations: string[]; intelligence?: IntelligenceAnalysis | null };
 export type AIReport = { id: number; model: string; prompt_version: string; created_at: string; report: AnalystReport; is_current: boolean };
 export type InvestigationListItem = { id: string; target: string; domain: string; kind: string; status: string; is_demo: boolean; created_at: string };
 export type Investigation = InvestigationListItem & {

@@ -27,7 +27,7 @@ try {
   await page.getByRole("tab", { name: /^Evidências/ }).click();
   await page.locator(".evidenceItem").first().waitFor();
   await page.getByText("Concluída", { exact: true }).waitFor();
-  assert.equal(await page.locator(".evidenceItem").count(), 4);
+  assert.equal(await page.locator(".evidenceItem").count(), 7);
   await fs.writeFile(path.join(process.env.TEST_OUTPUT_DIR, "restart-browser.json"), JSON.stringify({ utc: new Date().toISOString(), local_api_and_postgresql_restart: true, existing_session_and_history: true }));
   console.log("Browser after local API + PostgreSQL restart: PASS (synthetic session)");
 } finally { await browser.close(); }

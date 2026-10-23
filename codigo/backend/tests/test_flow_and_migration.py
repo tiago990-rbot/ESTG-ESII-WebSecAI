@@ -7,6 +7,7 @@ from app.db.session import SessionLocal, engine
 from app.models.user import User
 from app.services import providers
 from app.services.investigation_pdf import investigation_pdf
+from app.services.intelligence import QUESTIONS
 
 def test_source_to_ai_protocol_and_questions(client, accounts, monkeypatch):
     for key in ("URLHAUS_AUTH_KEY", "PHISHTANK_API_KEY", "TAVILY_API_KEY", "GROQ_API_KEY"):
@@ -24,6 +25,7 @@ def test_source_to_ai_protocol_and_questions(client, accounts, monkeypatch):
             prompt = json.loads(kwargs["json"]["messages"][1]["content"])
             ref = prompt["evidence"][0]["id"]
             report = {"summary": "Resumo de teste com referências.", "observations": [{"text": "Uma evidência foi recolhida.", "evidence_ids": [ref]}], "recommendations": [{"text": "Validar a fonte original.", "evidence_ids": [ref]}], "limitations": ["Resposta de teste, sem avaliação de um modelo real."]}
+            report["intelligence"] = {"conclusions": [], "correlations": [], "actions": [], "gaps": ["Teste controlado, sem modelo real."], "questions": [{"key": key, "answer": "Informação insuficiente neste teste de protocolo.", "assessment": "insufficient", "confidence": "low", "evidence_ids": [], "caveat": "O teste verifica o contrato, não a qualidade semântica."} for key in QUESTIONS]}
             return {"choices": [{"message": {"content": json.dumps(report)}}]}
         raise AssertionError(url)
     monkeypatch.setattr(providers, "json_request", external)
@@ -31,6 +33,7 @@ def test_source_to_ai_protocol_and_questions(client, accounts, monkeypatch):
     id = response.json()["id"]
     d = client.get("/api/v1/investigations/" + id, headers=accounts[0]).json()
     assert d["reports"] and any(r["provider"] == "ai" and r["status"] == "success" for r in d["runs"])
+    assert len(d["reports"][-1]["report"]["intelligence"]["questions"]) == 6
     assert any(e["confirmation"] == "allegation" for e in d["evidence"])
     assert len([url for url in calls if "tavily" in url]) == 2
     answer = client.post("/api/v1/investigations/" + id + "/questions", json={"text": "Que evidências devo validar?"}, headers=accounts[0])

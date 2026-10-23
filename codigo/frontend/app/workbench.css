@@ -393,3 +393,37 @@ summary:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline:
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
+
+/* Intelligence report: clear scope, explicit uncertainty and actionable analysis. */
+.wb-scopePicker { border: 0; padding: 0; margin: 18px 0 6px; min-width: 0; }
+.wb-scopePicker legend { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.wb-scopePicker > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.wb-scopePicker button { border: 1px solid var(--border); background: #0a1520; border-radius: 8px; padding: 15px; text-align: left; color: var(--text); cursor: pointer; }
+.wb-scopePicker button[aria-pressed="true"] { border-color: #5db5a6; background: rgba(106, 227, 204, .06); }
+.wb-scopePicker strong { display: block; font-size: 12px; color: var(--primary); font-weight: 600; }
+.wb-scopePicker button span { display: block; color: var(--muted); font-size: 10px; line-height: 1.8; margin-top: 7px; }
+.wb-authorization { border-left: 2px solid #477e73; padding: 12px; background: rgba(106, 227, 204, .035); margin-block: 8px; }
+.wb-intelligence { display: grid; gap: 34px; margin-block: 28px; overflow-wrap: anywhere; }
+.wb-intelligence h3 { font-size: 23px; font-weight: 500; }
+.wb-intelligence section > .eyebrow { margin-bottom: 8px; }
+.wb-intelligence article > p { font-size: 13px; line-height: 1.9; }
+.wb-judgements { display: grid; gap: 16px; }
+.wb-judgements article, .wb-correlation { border: 1px solid var(--border); padding: 20px; border-radius: 9px; background: rgba(8, 15, 24, .4); }
+.wb-correlation { border-left: 2px solid #648684; margin-top: 16px; }
+.wb-answer summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; font-size: 14px; }
+.wb-answer summary::after { content: "+"; font-size: 19px; color: var(--primary); }
+.wb-answer[open] summary::after { content: "−"; }
+.wb-answer summary > .wb-tag { margin-left: auto; font-size: 9px; }
+.wb-answer > p { font-size: 13px; line-height: 1.9; }
+.wb-priority { display: flex; align-items: flex-start; gap: 18px; padding: 25px 0; border-bottom: 1px solid var(--border); }
+.wb-priorityCode { background: #132e33; color: var(--primary); border: 1px solid #3b726c; font-family: Consolas, monospace; font-size: 13px; padding: 8px; border-radius: 5px; flex: 0 0 auto; }
+.wb-priority h4 { margin: 0; font-weight: 500; font-size: 17px; line-height: 1.5; }
+.wb-priority p { font-size: 13px; line-height: 1.9; }
+.wb-questionPrompts { display: flex; flex-wrap: wrap; gap: 8px; }
+.wb-questionPrompts .quickTarget { font-size: 10px; text-align: left; padding: 8px 10px; }
+@media (max-width: 520px) {
+  .wb-scopePicker > div { grid-template-columns: 1fr; }
+  .wb-answer summary > .wb-tag { margin-left: 0; }
+  .wb-priority { gap: 12px; }
+  .wb-judgements article, .wb-correlation { padding: 16px; }
+}

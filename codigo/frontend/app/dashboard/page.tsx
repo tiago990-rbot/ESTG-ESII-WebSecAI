@@ -95,7 +95,7 @@ export default function DashboardPage() {
                     <td>{scan.domain}</td>
                     <td>{scan.score}</td>
                     <td>{riskLabel(scan.risk_level)}</td>
-                    <td><Link className="btn" href={`/history/${scan.id}`}>Abrir</Link></td>
+                    <td><div className="actions" style={{ marginTop: 0 }}><Link className="btn" href={`/history/${scan.id}`}>Abrir</Link><Link className="sourceLink" href={"/investigations?target=" + encodeURIComponent(scan.domain) + "&mode=combined"}>Dossiê completo</Link></div></td>
                   </tr>
                 ))}
               </tbody>

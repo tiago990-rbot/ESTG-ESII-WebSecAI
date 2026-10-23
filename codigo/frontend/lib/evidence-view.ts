@@ -8,6 +8,7 @@ export const categoryNames: Record<string, string> = {
   incident_report: "Relato de incidente", public_reference: "Referência pública", exposure: "Exposição",
   kev_general: "Alerta geral KEV", kev_candidate: "Candidato KEV", message_signal: "Sinal da mensagem",
   malware: "Indicador de malware", phishing: "Indicador de phishing",
+  technical_posture: "Postura de configuração", technical: "Verificação técnica",
 };
 export const relationNames = {
   reference: "Referência recolhida", review: "Relação por verificar", general: "Alerta geral",

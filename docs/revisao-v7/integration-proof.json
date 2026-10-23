@@ -1,0 +1,52 @@
+[
+  {
+    "repository": "WebSecAI",
+    "verified_code_files": 38,
+    "new_or_changed_since_v5": [
+      "codigo/frontend/components/InvestigationDetail.tsx",
+      "codigo/frontend/app/investigations/page.tsx",
+      "codigo/frontend/lib/evidence-view.ts",
+      "codigo/frontend/app/workbench.css",
+      "codigo/frontend/app/dashboard/page.tsx",
+      "codigo/backend/app/schemas/investigation.py",
+      "codigo/backend/app/services/ai_service.py",
+      "codigo/backend/app/services/intelligence.py",
+      "codigo/backend/app/services/investigation_service.py",
+      "codigo/backend/app/services/demo_report.py",
+      "codigo/backend/app/services/investigation_pdf.py",
+      "codigo/backend/evaluations/report_fixture.py",
+      "codigo/backend/tests/test_intelligence_report.py",
+      "codigo/backend/tests/test_flow_and_migration.py",
+      "codigo/frontend/lib/investigations.ts",
+      "codigo/frontend/components/IntelligenceBrief.tsx",
+      "codigo/backend/app/services/investigation_pdf_visuals.py",
+      "codigo/backend/tests/test_pdf_visuals.py"
+    ],
+    "method": "exact attachments matched by SHA256; preserved existing v5 and hosting adaptations"
+  },
+  {
+    "repository": "github-integration",
+    "verified_code_files": 38,
+    "new_or_changed_since_v5": [
+      "codigo/frontend/components/InvestigationDetail.tsx",
+      "codigo/frontend/app/investigations/page.tsx",
+      "codigo/frontend/lib/evidence-view.ts",
+      "codigo/frontend/app/workbench.css",
+      "codigo/frontend/app/dashboard/page.tsx",
+      "codigo/backend/app/schemas/investigation.py",
+      "codigo/backend/app/services/ai_service.py",
+      "codigo/backend/app/services/intelligence.py",
+      "codigo/backend/app/services/investigation_service.py",
+      "codigo/backend/app/services/demo_report.py",
+      "codigo/backend/app/services/investigation_pdf.py",
+      "codigo/backend/evaluations/report_fixture.py",
+      "codigo/backend/tests/test_intelligence_report.py",
+      "codigo/backend/tests/test_flow_and_migration.py",
+      "codigo/frontend/lib/investigations.ts",
+      "codigo/frontend/components/IntelligenceBrief.tsx",
+      "codigo/backend/app/services/investigation_pdf_visuals.py",
+      "codigo/backend/tests/test_pdf_visuals.py"
+    ],
+    "method": "exact attachments matched by SHA256; preserved existing v5 and hosting adaptations"
+  }
+]

@@ -12,6 +12,8 @@ from app.services.scan_service import run_website_analysis
 from app.core.targets import parse_target
 from app.services.coverage import summarize_coverage, target_evidence
 from app.services.incident_groups import candidate_groups
+from app.services.intelligence import technical_records
+from app.services.demo_report import demo_analysis
 
 _worker_slots = threading.Semaphore(2)
 RETRY_STATUSES = {"error", "partial", "not_configured", "access_denied", "rate_limited", "interrupted", "stale"}
@@ -108,6 +110,18 @@ def persist_result(inv_id: str, provider: str, result: providers.Result, refresh
         db.commit()
 
 def demo(inv_id: str):
+    with SessionLocal() as db:
+        inv = db.get(Investigation, inv_id)
+        if inv is None:
+            return
+        combined = inv.options.get("technical", False) and inv.kind == "domain"
+        if combined:
+            inv.technical = {"score": 72, "risk_level": "medium", "summary": "Postura técnica fictícia, criada para demonstrar a apresentação conjunta com Threat Intelligence.", "details": {}, "findings": [
+                {"title": "Content-Security-Policy não observada no exemplo", "description": "Resultado simulado de configuração; não prova vulnerabilidade explorável.", "recommendation": "Num sistema próprio, validar a política aplicável e testar a compatibilidade antes de a alterar.", "severity": "medium", "category": "headers"},
+                {"title": "Atributos de cookies a rever no exemplo", "description": "Cenário fictício de atributo Secure por verificar.", "recommendation": "Num sistema autorizado, confirmar os atributos por cookie e o contexto de utilização.", "severity": "medium", "category": "cookies"},
+            ]}
+            technical = inv.technical
+            db.commit()
     records = [
         ("osint", providers.item("incident_report", "Exemplo didático: incidente reportado", "Notícia fictícia para demonstrar a cronologia. Não descreve um incidente real.", published="2026-10-01", demo=True)),
         ("osint", providers.item("public_reference", "Exemplo didático: alegação num fórum", "Alegação fictícia, sem confirmação. Demonstra a distinção entre publicação e facto.", demo=True)),
@@ -116,15 +130,19 @@ def demo(inv_id: str):
     ]
     for provider in ("osint", "urlhaus", "kev"):
         persist_result(inv_id, provider, providers.Result("demo", "Dados demonstrativos, sem chamadas à fonte.", [entry for name, entry in records if name == provider]))
+    if combined:
+        entries = technical_records(technical, providers.item)
+        for entry in entries:
+            entry["meta"]["demo"] = True
+        persist_result(inv_id, "technical", providers.Result("demo", "Configuração fictícia; não foram enviados pedidos ao alvo.", entries))
     with SessionLocal() as db:
         inv = db.get(Investigation, inv_id)
         if inv is None:
             return
         evidence = [evidence_dict(e) for e in inv.evidence]
-        ref = evidence[0]["id"]
-        report = {"summary": "Exemplo de relatório: o painel reúne sinais e referências, preservando as incertezas. Este texto foi produzido por regras de demonstração, sem chamada a um modelo de IA.", "observations": [{"text": "Há uma referência fictícia para demonstrar o vínculo entre afirmação e evidência.", "evidence_ids": [ref]}], "recommendations": [{"text": "Numa investigação real, ler a fonte original e verificar se diz respeito à organização.", "evidence_ids": [ref]}], "limitations": ["Dados fictícios e identificados como demonstração.", "O modo real exige configuração das fontes aplicáveis."]}
+        report = demo_analysis(evidence)
         snapshot = detail(inv)
-        db.add(AIReport(investigation_id=inv_id, model="demonstracao-sem-LLM", prompt_version="demo-v1", evidence_hash=ai_service.context_hash(evidence, snapshot["runs"]), report=ai_service.validated_report(report, evidence)))
+        db.add(AIReport(investigation_id=inv_id, model="demonstracao-sem-LLM", prompt_version="demo-v2-intelligence", evidence_hash=ai_service.context_hash(evidence, snapshot["runs"]), report=ai_service.validated_report(report, evidence)))
         inv.status, inv.finished_at = "completed", datetime.now(timezone.utc)
         db.commit()
     persist_result(inv_id, "ai", providers.Result("demo", "Exemplo orientado por regras; não foi consultado um modelo de IA."))
@@ -151,7 +169,7 @@ def run_investigation(inv_id: str, message: str = ""):
                         if inv:
                             inv.technical = technical
                             db.commit()
-                    entries = [providers.item("technical", f["title"], f["description"] + " Recomendação: " + f["recommendation"], severity=f["severity"]) for f in technical["findings"][:15]]
+                    entries = technical_records(technical, providers.item)
                     persist_result(inv_id, "technical", providers.Result("success", "Verificações técnicas concluídas; score de postura separado da reputação.", entries))
                 except (OSError, ValueError):
                     persist_result(inv_id, "technical", providers.Result("error", "Análise técnica indisponível ou destino não permitido."))
@@ -235,7 +253,7 @@ def retry_source_result(inv_id, provider, inv):
             current = db.get(Investigation, inv_id)
             current.technical = technical
             db.commit()
-        entries = [providers.item("technical", f["title"], f["description"] + " Recomendação: " + f["recommendation"], severity=f["severity"]) for f in technical["findings"][:15]]
+        entries = technical_records(technical, providers.item)
         return providers.Result("success", "Verificações técnicas autorizadas repetidas.", entries)
     if provider == "kev":
         return providers.guarded(providers.kev, inv.options.get("product", ""))
