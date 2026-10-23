@@ -1,3 +1,5 @@
+> Adenda atual — convites e passwords no site, 23/10/2026. Codigo 1ee44cfeb4f77d8aee2ab1659173d671354956a2; Render dep-dbdqk229lscs73aef270 Live; Cloudflare 3dd06322-455f-4094-903a-016d31469db7. Nova migracao 20261023_02,152testesPG e formularios com revogacao de sessoes. Seguir VALIDACAO_PASSWORDS_SITE.md e CONTAS_E_PASSWORDS_NO_SITE.md. O texto v7 abaixo e historico; nao usar as instrucoes antigas de criacao/password/rollback como estado atual. Nenhuma credencial real foi alterada pelo assistente.
+
 # Validação da publicação — v7 integrada, 23/10/2026
 
 ## Resultado atual

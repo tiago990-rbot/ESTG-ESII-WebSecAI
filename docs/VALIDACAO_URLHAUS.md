@@ -1,3 +1,5 @@
+> Adenda passwords: fonte 3d3d70da8712c899b920a6b062e63a2c2bb7bd37, sem novas leituras de chaves e0consultas reais URLhaus/Tavily/Groq nesta passagem. O detalhe anterior fica historico.
+
 # Validação URLhaus — 22/10/2026
 
 ## Resultado efetivo

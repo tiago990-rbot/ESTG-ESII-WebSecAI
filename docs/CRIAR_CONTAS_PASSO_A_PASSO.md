@@ -1,3 +1,5 @@
+> Adenda atual — convites e passwords no site, 23/10/2026. Codigo 1ee44cfeb4f77d8aee2ab1659173d671354956a2; Render dep-dbdqk229lscs73aef270 Live; Cloudflare 3dd06322-455f-4094-903a-016d31469db7. Nova migracao 20261023_02,152testesPG e formularios com revogacao de sessoes. Seguir VALIDACAO_PASSWORDS_SITE.md e CONTAS_E_PASSWORDS_NO_SITE.md. O texto v7 abaixo e historico; nao usar as instrucoes antigas de criacao/password/rollback como estado atual. Nenhuma credencial real foi alterada pelo assistente.
+
 # Criar as contas WebSecAI — passos privados
 
 ## 1. Alterar primeiro a password Neon exposta
@@ -16,7 +18,7 @@ No Neon, na mesma branch websecai-validacao, abre **Connect → Connection strin
 2. No Render, serviço **websecaiapi → Environment → Edit**, substitui **DATABASE_URL** pela ligação nova.
 3. Volta ao Neon, desliga **Connection pooling** e copia a ligação direta da mesma branch/base/role.
 4. Substitui **DATABASE_MIGRATION_URL** no Render pela ligação direta.
-5. Confirma privadamente que **APP_ALLOWED_EMAILS** contém os dois emails autorizados: <lista privada dos dois emails autorizados>. Não acrescentar outras pessoas por rotina.
+5. Confirma privadamente que **APP_ALLOWED_EMAILS** contém os dois emails autorizados: tmelo1715@gmail.com,goncalofazendeirocordeiro@gmail.com. Não acrescentar outras pessoas por rotina.
 6. Mantém **CORS_ORIGINS=https://websecai-frontend.websecai-estg.workers.dev** e preserva JWT_SECRET e os restantes campos. Não alteres limites de fornecedores, planos ou serviços.
 7. Escolhe **Save, rebuild, and deploy**, guarda e aguarda **Live/Deploy succeeded**. A alteração pode interromper temporariamente a ligação à base até os valores estarem atualizados.
 
