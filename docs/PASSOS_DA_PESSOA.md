@@ -1,37 +1,57 @@
-# Passos privados da pessoa — instalação online
+# Passos atuais da pessoa
 
-## CORS corrigido e confirmado — 2026-10-22T23:29:02.087594+00:00
+Seguir CRIAR_CONTAS_PASSO_A_PASSO.md: rotação Neon, ligações pooled/direta no Render e criação privada de contas. CORS já está corrigido. A revisão v5 foi publicada. Contas e aceitação autenticada online ainda não confirmadas.
 
-Depois da correção humana e do deploy Render `dep-dbd9npbrjlhs73cgrctg`, a verificação remota confirmou: novo /login HTTP 200, API /health HTTP 200/status ok, preflight da origem nova HTTP 200 com a origem exata e origem antiga HTTP 400 sem autorização. O bloqueio CORS descrito nos registos anteriores está resolvido. Nenhuma credencial foi consultada e nenhuma chamada a fornecedores foi feita. Ainda faltam confirmar provisionamento, login e aceitação remota autenticada; o consumo CPU Cloudflare mantém-se pendente.
+# Criar as contas WebSecAI — passos privados
 
-## Registo anterior, anterior à correção acima
+## 1. Alterar primeiro a password Neon exposta
 
-## Primeiro: corrigir a ligação da interface
+A página Neon **Roles** da branch **websecai-validacao**, projeto **WebSecCheckAI**, ficou aberta no menu da role neondb_owner. Clica pessoalmente em **Reset password** e confirma. Esta é a password da base, diferente das passwords das contas WebSecAI. Não envies valores ou capturas.
 
-O novo link é https://websecai-frontend.websecai-estg.workers.dev/login. Abre, mas a API ainda aceita apenas a origem anterior. No Render, websecaiapi → Environment → Edit, guardar:
+Se a ligação exposta foi copiada de outra branch, roda também a credencial nessa branch. A gestão de roles é por branch; não assumir que alterar uma altera todas. Não eliminar roles ou bases.
 
-```text
-CORS_ORIGINS=https://websecai-frontend.websecai-estg.workers.dev
-APP_ALLOWED_EMAILS=<lista privada dos dois emails autorizados>
-```
+Documentação oficial: https://neon.com/docs/manage/roles.
 
-Não alterar as URLs Neon nem JWT_SECRET. Escolher Save, rebuild, and deploy e guardar. Aguardar Live e avisar «configuração guardada», sem valores ou capturas de credenciais. A revisão automática bloqueou o controlo de edição/revelação; a pessoa conclui no painel. O terceiro email ainda não foi indicado.
+## 2. Atualizar as ligações privadas do Render
 
-## Criar as contas WebSecAI
+No Neon, na mesma branch websecai-validacao, abre **Connect → Connection string**, confirma a base neondb e a role correta.
 
-Contas Neon/Cloudflare/Render/GitHub são diferentes das contas da aplicação. Email autorizado não significa conta criada. O backend de produção fecha o registo público, apesar de ainda existir o botão Criar conta na interface.
+1. Liga **Connection pooling** e copia a ligação nova completa.
+2. No Render, serviço **websecaiapi → Environment → Edit**, substitui **DATABASE_URL** pela ligação nova.
+3. Volta ao Neon, desliga **Connection pooling** e copia a ligação direta da mesma branch/base/role.
+4. Substitui **DATABASE_MIGRATION_URL** no Render pela ligação direta.
+5. Confirma privadamente que **APP_ALLOWED_EMAILS** contém os dois emails autorizados: <lista privada dos dois emails autorizados>. Não acrescentar outras pessoas por rotina.
+6. Mantém **CORS_ORIGINS=https://websecai-frontend.websecai-estg.workers.dev** e preserva JWT_SECRET e os restantes campos. Não alteres limites de fornecedores, planos ou serviços.
+7. Escolhe **Save, rebuild, and deploy**, guarda e aguarda **Live/Deploy succeeded**. A alteração pode interromper temporariamente a ligação à base até os valores estarem atualizados.
 
-Nesta máquina, Tiago abre pessoalmente Criar_Conta_WebSecAI.cmd e Criar_Conta_Goncalo.cmd em outputs. Cada launcher pede a ligação Neon direta em campo oculto e o nome/password duas vezes através do script existente. Selecionar **WebSecCheckAI → websecai-validacao → Connect → pooling desligado**. A ligação não é guardada pelo helper; não a enviar no chat. Não executar estes launchers através do assistente. Se já existir .env.production, usar o script normal com essa configuração privada. Contas existentes são preservadas; não há reset de password.
+Não copies valores para código, ficheiros .cmd, chat, capturas ou Git. O assistente não precisa de conhecer as ligações.
 
-Para outra máquina, preparar privadamente codigo/backend/.env.production com o destino autorizado e executar pessoalmente `python scripts/provision_group.py`. O README/VALIDACAO_PUBLICACAO descrevem as variáveis; não copiar configurações do colega nem enviar ficheiros privados. A conta do Gonçalo deve ter password própria, introduzida por ele ou combinada diretamente entre as pessoas por um canal privado, sem o modelo.
+## 3. Criar a tua conta
 
-Depois, cada um abre /login, introduz o seu username/email e a sua password. Não partilhar uma sessão. Gonçalo não precisa de receber a ligação Neon, passwords dos fornecedores ou acesso administrativo para usar a app. As investigações de cada conta continuam privadas.
+A janela **WebSecAI - criar contas do grupo em privado** apresenta um menu. Escolhe **1** para Tiago. Este menu executa o procedimento existente de provisionamento; não abre o registo público.
 
-## O que ainda precisa de aceitação
+1. Quando o terminal pedir **Ligacao direta Neon (oculta)**, cola a ligação com pooling desligado e carrega em Enter. É normal não aparecer texto. Não coles a ligação no editor do ficheiro.
+2. Introduz um nome de utilizador entre 3 e 80 caracteres.
+3. Introduz uma password WebSecAI própria entre 6 e 128 caracteres e repete-a. Escolhe uma password longa e diferente da password Neon. O terminal não a mostra.
+4. Aguarda **Conta criada**. Se aparecer **Conta existente preservada**, não foi criada outra nem alterada a password existente.
+5. Se houver erro, lê a mensagem genérica e confirma privadamente branch/ligação/dados. Não envies valores. Não repetir consultas externas para tentar resolver a conta.
 
-- Entrar e executar a demonstração fictícia, abrir histórico e PDF, recarregar e verificar isolamento entre duas contas. Confirmar também após cold start. Até agora essa aceitação completa foi local com contas sintéticas.
-- URLhaus: obter/guardar a Auth-Key apenas no formulário oculto local; responder «URLhaus guardada». Só depois, no máximo duas consultas totais ao fornecedor oficial através de scripts/validar_urlhaus.py. Zero feitas até agora. Chave local não é automaticamente chave no Render.
-- Tavily/Groq: limites online continuam a zero; nenhuma chamada real sem pequeno orçamento humano confirmado. Não repetir lotes antigos.
-- Resolver o consumo CPU do frontend antes de declarar Free sustentado aceite (P50 observado 18,322 ms perante limite 10 ms). Nenhum upgrade autorizado. Ver relatório.
+Se a janela já estiver fechada, abre o **Explorador de Ficheiros** e executa por duplo clique **outputs/Criar_Contas_Grupo.cmd**. Clicar num link desse ficheiro no Codex pode abrir o editor; isso não executa o programa. O menu e os launchers são locais desta máquina, não são o pacote portátil para o Gonçalo.
 
-Entregar ao Gonçalo ENTREGA_AO_GONCALO.md, o link do ramo/PR e o pacote de alterações. Não enviar .env, bases, chaves, cookies, auth dirs, tokens ou logs. Os launchers de autorização/configuração em outputs são ajudas locais desta máquina, não um pacote portátil para o colega.
+Se existir .env.production, o helper preserva-o e pede para usar o procedimento normal `codigo/backend/scripts/provision_group.py`, com configuração privada preparada pela pessoa. O assistente não lê esse ficheiro nem o executa com dados reais.
+
+## 4. Criar a conta do Gonçalo
+
+No mesmo menu escolhe **2**. Repete o procedimento com um username e uma password próprios para ele. O email da conta já está selecionado no helper. Se ele estiver contigo, deixa-o introduzir pessoalmente a password; caso contrário, combina os dados por um canal privado entre pessoas. Não enviar a ligação Neon ao colega apenas para usar a app. O helper preserva contas existentes e não redefine passwords.
+
+O terceiro email ainda não foi identificado. Não criar uma conta coletiva nem partilhar sessões. Cada conta vê apenas as suas investigações.
+
+## 5. Entrar e confirmar o funcionamento
+
+Abrir **https://websecai-frontend.websecai-estg.workers.dev/login**, introduzir email/username e password WebSecAI. A interface deve explicar o acesso restrito; não existe formulário público para criar contas em produção.
+
+Começar por **Explorar demonstração**, abrir Panorama, Evidências, Cronologia, Mapa de relações e PDF. A demonstração é fictícia e não deve fazer consultas a fornecedores. Confirmar recarregamento/histórico e que a outra conta não acede aos dossiês da primeira. O primeiro acesso pode demorar cerca de um minuto devido à suspensão Render Free.
+
+Confirmar no chat apenas **credencial rodada, Render atualizado e entrei**. Não enviar passwords, tokens, ligações ou capturas com dados sensíveis.
+
+Tavily/Groq mantêm limites a zero até existir pequeno orçamento humano confirmado. URLhaus continua com zero consultas reais nesta passagem e máximo de duas após configuração privada. O ajuste visual não resolve automaticamente o risco CPU do plano Cloudflare Free; ver VALIDACAO_PUBLICACAO.md.

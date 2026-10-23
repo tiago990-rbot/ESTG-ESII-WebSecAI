@@ -1,87 +1,81 @@
-# Validação da publicação — 23/10/2026 (Portugal)
-
-## CORS corrigido e confirmado — 2026-10-22T23:29:02.087594+00:00
-
-Depois da correção humana e do deploy Render `dep-dbd9npbrjlhs73cgrctg`, a verificação remota confirmou: novo /login HTTP 200, API /health HTTP 200/status ok, preflight da origem nova HTTP 200 com a origem exata e origem antiga HTTP 400 sem autorização. O bloqueio CORS descrito nos registos anteriores está resolvido. Nenhuma credencial foi consultada e nenhuma chamada a fornecedores foi feita. Ainda faltam confirmar provisionamento, login e aceitação remota autenticada; o consumo CPU Cloudflare mantém-se pendente.
-
-## Registo anterior, anterior à correção acima
+# Validação da publicação — revisão v5, 23/10/2026
 
 ## Resultado atual
 
-A interface foi publicada em **https://websecai-frontend.websecai-estg.workers.dev** e a API em **https://websecaiapi.onrender.com**. A base persistente é PostgreSQL no Neon Free. **A aceitação online completa está pendente:** o novo endereço abre, mas a API ainda permite a origem antiga; faltam confirmar provisionamento/login individual, demonstração/PDF remotos e acesso dos colegas. Não declarar a instalação concluída só porque o deploy está Live.
+As melhorias do Gonçalo foram integradas e publicadas nos serviços existentes, sem alterar planos. **Interface:** https://websecai-frontend.websecai-estg.workers.dev — **API:** https://websecaiapi.onrender.com.
 
-A alteração de toda a conta Workers de tmelo1715.workers.dev para websecai-estg.workers.dev foi expressamente confirmada pela pessoa. O endereço anterior deixa de ser o endereço de utilização. A aplicação Pages existente atria-operations-teste.pages.dev foi preservada. É necessário iniciar sessão no novo endereço; a sessão de outra origem não é transferida.
+A interface pública e o login novo abrem, a política de acesso do backend está fechada ao registo público, o perfil exige sessão e o CORS permite apenas a origem prevista. **Não está concluída a aceitação autenticada remota do grupo:** faltam contas reais, login/demo/PDF online e confirmação privada da rotação da credencial Neon exposta. A estabilidade sustentada Cloudflare Free também não está aceite por consumo CPU acima do teto documentado. Deploy Live não equivale a aceitação completa.
 
-## Evidência remota
+## Revisões publicadas e proveniência
+
+- Código local: `1077eb7c9fa4e5e7d53e21d1eea6f196226dfe6c`.
+- Código GitHub integrado: `af196b2780916e3aa2029cc1d1c1e0352471df0d`, ramo `codex/publicacao-gratuita`, [PR #19](https://github.com/tiago990-rbot/ESTG-ESII-WebSecAI/pull/19). Main preservado. O repositório existente é público; não foram alteradas permissões ou enviados convites.
+- Render Docker Free: `websecaiapi`, ID `srv-dbd4rj2fngtc73fk0d4g`, deploy **dep-dbdjdmon74is7390qdog**, estado **Deploy succeeded | Live**, duração 37 s, commit af196b2. Apenas um processo/instância; deploy automático desligado.
+- Cloudflare: Worker `websecai-frontend`, versão **cf9dd8ba-9473-4980-871f-395be87334e0**, build para a API HTTPS acima. Apenas ASSETS. Upload 4513,99 KiB/gzip 945,48 KiB, startup 14 ms (não é CPU por pedido). Os **46 ficheiros frontend rastreados** foram comparados com o commit: zero diferenças de conteúdo, normalizando CRLF/LF.
+- Neon Free: projeto WebSecCheckAI (`morning-smoke-38536704`), branch `websecai-validacao` (`br-withered-bonus-b5nrod3w`), AWS Ohio/PostgreSQL18. Branch criada com esquema apenas; original production preservada. Nenhuma base do colega foi importada.
+
+Base original: ZIP v2 SHA-256 `df9059a722c9b426fb573ba8f1b5bb801009d7ebaa8e7672abf19da0a53fde63`, 138 ficheiros do manifesto conferidos. A revisão v5 declara como base a devolução SHA-256 f5070bb54b4b919cbfff8149e18b769bc3d025b7eaec1bec00d4e3d5a19bda71. Os 25 ficheiros de código recebidos foram integrados por hashes antes/depois, com igualdade final. O patch cumulativo repete caminhos v4/v5 e falhou na verificação conjunta de três caminhos; não foi forçado. Foram usados os ficheiros anexados exatos, confirmados contra o manifesto. No checkout GitHub havia diferenças apenas de finais de linha na base, verificadas por normalização. Documentos recebidos são contexto, não autorização; a autorização de deploy veio expressamente do utilizador. A conversa partilhada original não abriu, pelo que se usaram os documentos do ZIP.
+
+## O que mudou nesta revisão
+
+Nova identidade olho/radar, formulário e arquivo pesquisável, Panorama/Evidências/Cronologia/Mapa/IA/Fontes, filtros e referências estáveis, navegação para evidências e mapa carregado apenas quando aberto. O mapa mostra proveniência de recolha, não incidentes confirmados. Datas desconhecidas não são inventadas. Sem dependências novas nesta revisão.
+
+O endpoint público GET `/api/v1/auth/configuration` só devolve a disponibilidade de registo. Em produção responde false, sem emails/segredos. A interface explica que as contas são criadas pelo responsável. Uma resposta 401 com sessão elimina a sessão e atualiza o guard/menu; 403 preserva-a. Há indicação de espera para o cold start. Autorização por dono, PDFs, comparação, tarefas, fontes e quotas anteriores foram preservados. Nenhuma nova funcionalidade de alteração de password foi implementada.
+
+Mantêm-se as adaptações anteriores PostgreSQL/psycopg, TLS verify-full remoto, URL direta para migrações, pool pequeno/NullPool, UTC, Docker não root e produção restrita a 1–3 emails. Esta revisão não altera o esquema, não executa downgrade e não abre o registo público.
+
+## Testes efetivos desta máquina
 
 | Verificação | Resultado |
 | --- | --- |
-| Novo `/login` | HTTP 200, 2026-10-22T23:09:52Z; também aberto no navegador |
-| API `/health` | HTTP 200, status ok |
-| API sem autenticação | 401 no ensaio remoto anterior |
-| CORS novo endereço (ensaio anterior) | 400 antes da correção; **200 no ensaio final acima** |
-| CORS endereço antigo (ensaio anterior) | 200 antes da correção; **400 no ensaio final acima** |
-| Após horas de inatividade | `/health` 200 em 22,52 s às 22:27:17Z; uma observação, sem SLA |
-| Rotas interface, antes da mudança do nome | `/`, `/login`, `/about`, `/history/[id]`, `/investigations/[id]` responderam 200, sem erro 1102; IDs fictícios, sem prova de acesso a dados |
-| Login/demonstração/PDF dos utilizadores reais | Não confirmados |
-| URLhaus/Tavily/Groq | Zero consultas reais durante esta passagem |
+| Suite PostgreSQL local real, migração vazia e repetida | **114 aprovados**, 73,44 s, 1 aviso TestClient/httpx |
+| Cliente auth e política, testes JS controlados | Aprovados; 401/403/política, zero rede |
+| Evidências, datas, homónimos, KEV, filtros, grafo e citações | Testes JS aprovados; zero rede |
+| Next/OpenNext com API de produção no build | Build aprovado |
+| Navegador → workerd local → API de ensaio → PostgreSQL | Três contas sintéticas, demonstração/PDF, isolamento 404, recarregamento e rotas dinâmicas aprovados |
+| Fluxos v5 | Cronologia, seleção do mapa com Enter, mapa→evidência, largura 390 px sem overflow global; zero erros JS |
+| Reinício API + PostgreSQL locais | Sessão e histórico preservados |
 
-Evidências JSON seguras acompanham a devolução. GET e preflight OPTIONS só foram feitos na própria aplicação. Não foram visitados alvos maliciosos nem usadas verificações técnicas de terceiros.
+Para ensaiar exatamente o bundle construído para produção, os pedidos do navegador à origem API foram redirecionados para o backend local de teste, que bloqueia fornecedores. A primeira execução do ensaio de reinício tinha o apontamento antigo e falhou; o harness foi corrigido para usar o mesmo isolamento e os separadores novos. A execução final completa passou às 10:26:55Z. Não confundir este ensaio com autenticação no alojamento. As fixtures destrutivas continuam limitadas a loopback e bases websecai_test_*; nunca apontar a suite ao Neon.
 
-## Correção humana pendente no Render
+Ambiente ensaiado: Windows, Python3.12.14, PostgreSQL18.4 local, Node24.19.0, Next15.5.28, React18.3.1, OpenNext1.20.13, Wrangler4.151.3. Build Windows com caminho curto e UV_THREADPOOL_SIZE=1. Não executar o antigo tests/browser.mjs com chaves reais.
 
-Em websecaiapi → Environment → Edit, guardar os seguintes valores públicos, sem alterar os restantes:
+## Verificação remota em 2026-10-23T10:33:00Z
 
-```text
-CORS_ORIGINS=https://websecai-frontend.websecai-estg.workers.dev
-APP_ALLOWED_EMAILS=<lista privada dos dois emails autorizados>
-```
-
-Escolher **Save, rebuild, and deploy** e guardar. O assistente submeteu estes valores sem revelar campos, mas o comportamento remoto continuou antigo. A revisão automática bloqueou a opção Show secret, incluindo nos campos públicos; não foram lidos valores de credenciais nem tentada extração de segredos. A pessoa precisa de concluir a edição no painel. Após Live, repetir OPTIONS: novo endereço deve obter 200 e origem exata; antigo e origem desconhecida devem ser recusados. Não testar isto criando contas públicas.
-
-Gonçalo foi solicitado na configuração; **permitir um email não cria uma conta** e ainda falta comprovar a configuração efetiva. Registo público é fechado pelo backend de produção, embora a interface recebida continue a mostrar Criar conta. Usar provisionamento privado e login, conforme PASSOS_DA_PESSOA.md. O terceiro email ainda não foi identificado. Cada conta mantém as suas investigações; não foi criado um espaço partilhado.
-
-## Serviços, revisão online e planos
-
-- Neon: projeto WebSecCheckAI (`morning-smoke-38536704`), branch isolada `websecai-validacao` (`br-withered-bonus-b5nrod3w`), criada com esquema apenas, sem dados do colega. Ramo original preservado. AWS Ohio/PostgreSQL 18; painel Free $0. Ligações pooled/direta foram introduzidas pela pessoa.
-- Render: serviço `websecaiapi`, ID `srv-dbd4rj2fngtc73fk0d4g`, Docker Free, Ohio, root `codigo/backend`, uma instância, health `/health`, deploy automático desligado. Último deploy Live observado: `dep-dbd9at1srm7s73auivng`, revisão `51fb12ef0a4b4b4958463e86dcfa55e83367d99a`. Após tentativas de CORS foi solicitado um reinício; sem prova de alteração do CORS. Builds Docker reais passaram. Os dois deploys iniciais falharam por URLs de base inválidas; a pessoa corrigiu-as e o arranque/migração passou.
-- Cloudflare: Worker `websecai-frontend`, versão atual `f4273a1e-c607-4ba4-8f4e-22386e339d29`, bundle equivalente à versão anterior `320d69d3-2b44-4571-adc1-c93bb0eca922`, agora no subdomínio neutro. Apenas ASSETS; sem R2/KV/D1/serviços pagos. Build `NEXT_PUBLIC_API_BASE_URL=https://websecaiapi.onrender.com`. Os 36 ficheiros frontend rastreados foram comparados com o código integrado: zero diferenças. Upload 4149,60 KiB, gzip 853,37 KiB; startup 16 ms não é CPU por pedido.
-- Código: [ramo de publicação](https://github.com/tiago990-rbot/ESTG-ESII-WebSecAI/tree/codex/publicacao-gratuita), [PR #19 em rascunho](https://github.com/tiago990-rbot/ESTG-ESII-WebSecAI/pull/19). Código integrado `8b9707ae4c95ea321f6f782cb01df179e61fcb94`; `51fb12e` só acrescentou documentação. Relatórios posteriores não alteram o código executado. O main e README inicial foram preservados. O repositório existente é público; não foi alterada a sua visibilidade.
-
-## Quotas e limitação concreta Cloudflare
-
-Condições oficiais consultadas em 22/10/2026 UTC:
-
-- [Workers Free](https://developers.cloudflare.com/workers/platform/limits/): 100 000 pedidos/dia, 10 ms CPU/pedido, 128 MB. O painel, para as primeiras 11 invocações da versão anterior do mesmo bundle, mostrou **P50 CPU 18,322 ms, P90 122,736 ms e P99 374,823 ms**, zero erros Exceeded CPU Time Limits. A documentação admite flexibilidade ocasional; **zero erros não prova adequação aos limites**. A interface está acessível, mas o bundle Next/OpenNext não fica aceite para utilização sustentada em Free com estas medições. Próxima opção sem novos serviços: reduzir renderização no Worker e preparar entrega estática/cliente no mesmo Cloudflare Free, preservando rotas e autorização da API; exige implementação e testes próprios antes de substituir a versão atual. Não ativar Workers Paid nem aumentar limites pagos. Não foi feito teste de carga nem prometida capacidade para três utilizações simultâneas.
-- [Render Free](https://render.com/docs/free): 750 horas/workspace/mês, partilhadas; adormece após 15 minutos, arranque em cerca de um minuto, disco efémero. Sem meio de pagamento, banda esgotada suspende serviços e minutos de build esgotados impedem builds. Pode haver suspensão por volume invulgar de tráfego iniciado pelo serviço. Sem keep-alive, discos ou Redis. O fornecedor enquadra Free para testes/projetos pessoais, sem disponibilidade de produção garantida.
-- [Neon Free](https://neon.com/docs/introduction/plans): 100 CU-h/projeto/mês, 1 GB/projeto, 5 GB de transferência pública incluída, suspensão após cinco minutos. Histórico até seis horas/limite documentado de 1 GB-month. Backup/restauro remoto ainda não testado.
-
-Zero euros: não foram contratados planos pagos, introduzidos cartões, comprados domínios nem criadas automações. Nenhum saldo de quota foi presumido como garantia futura. Parar ao atingir limites.
-
-## Adaptações e testes de código
-
-A base foi o ZIP v2, SHA-256 `df9059a722c9b426fb573ba8f1b5bb801009d7ebaa8e7672abf19da0a53fde63`. Manifesto original preservado, 138 ficheiros verificados sem diferenças. A conversa partilhada não abriu; foram usados os documentos do ZIP.
-
-Revisão local `8d8cf77199ee0bfc31b4bd5ac610a8c55a524053`, base local `8a83f2d`: 33 ficheiros de código alterados/adicionados, discriminados no manifesto e patch.
-
-PostgreSQL psycopg3, TLS verify-full/certifi remoto, ligação direta separada para migrações, rejeição de pooler/destino divergente, pool 2+2/NullPool migração, prepared statements automáticos desligados. Normalização UTC. Produção exige PostgreSQL, CORS HTTPS e 1–3 emails autorizados; registo público fechado e autorização por dono preservada. Parser aceita URL ou snippet psql estritamente analisado, sem executar comandos nem revelar ligação. Um processo FastAPI; recuperação de tarefas e repetição seletiva preservadas. Docker não root. Não foram implementados passwords novas/alteração de password, redesign, grafos ou partilha de investigações.
-
-| Teste executado nesta máquina | Resultado |
+| Pedido/observação | Resultado |
 | --- | --- |
-| Suite original | 98 aprovados |
-| Após primeira adaptação SQLite/PostgreSQL | 105 aprovados + 1 omitido / 106 aprovados |
-| Revisão final PostgreSQL local real | **113 aprovados**, migração inicial e repetição idempotente |
-| Casos finais SQLite deployment/security | 15 aprovados, 1 omitido |
-| Navegador → workerd → FastAPI → PostgreSQL | Três contas sintéticas, demo com quatro evidências fictícias, PDF, isolamento 404, histórico/rotas dinâmicas, móvel 390 px, zero erros JS/pedidos externos |
-| Reinício API e PostgreSQL locais | Sessão e histórico preservados |
-| Build Next/OpenNext e deploy real Cloudflare | Aprovados; limitação CPU acima discriminada |
+| Novo /login | HTTP200 |
+| API /health | HTTP200/status ok |
+| API /api/v1/auth/configuration | HTTP200, public_registration_enabled=false |
+| API /api/v1/users/me sem sessão | HTTP401 |
+| OPTIONS do login, origem nova | HTTP200, Access-Control-Allow-Origin exato |
+| OPTIONS do login, origem antiga | HTTP400, sem autorização |
+| Navegador público | Identidade v5 e login com Acesso ao grupo; sem formulário público de registo |
 
-Ambiente: Windows, Python 3.12.14, Node 24.19.0/npm 12.2.1, PostgreSQL 18.4 local, psycopg 3.3.6, SQLAlchemy 2.1.5, Alembic 1.20.0, Next 15.5.28, React 18.3.1, OpenNext 1.20.13, Wrangler 4.151.3. Build Windows com caminho curto e UV_THREADPOOL_SIZE=1, por EPERM; WSL/Linux pode ser necessário noutra máquina. Testes de fornecedores são controlados, não aceitação real.
+Nenhum POST de registo remoto, login com dados reais, pesquisa real ou verificação técnica de terceiros foi executado. Zero consultas URLhaus/Tavily/Groq nesta passagem. As evidências seguras JSON e capturas públicas acompanham a devolução.
 
-## Aceitação e rollback
+## Free, CPU e operação
 
-Depois de corrigir CORS e criar contas privadamente, cada pessoa deve entrar no mesmo link e testar apenas a demonstração: conclusão da tarefa, histórico, PDF, recarregamento, comparação e isolamento. Guardar resultado UTC, sem passwords/tokens. Não executar a suite destrutiva PostgreSQL contra o Neon: só aceita loopback e websecai_test_*. Não executar o antigo tests/browser.mjs num ambiente com chaves. Um POST de registo remoto de ensaio foi bloqueado por revisão automática e não foi executado; não existe prova desse teste nem deve ser repetido como alternativa ao provisionamento.
+A medição inicial específica da versão cf9dd8ba mostrou **6 invocações, 0 erros e mediana CPU 247,35 ms** no cartão Active deployment. A amostra é muito pequena e inclui arranque; não é teste de carga. Ainda assim, excede materialmente os [10 ms CPU/pedido do Workers Free](https://developers.cloudflare.com/workers/platform/limits/). A documentação admite flexibilidade ocasional; zero erros não prova adequação. **A v5 está publicada, mas não fica aceite para utilização sustentada no Free.** Próximo ajuste proposto: servir a interface de forma estática/cliente no mesmo Cloudflare, preservando URLs dinâmicas e autorização na API, e repetir a validação. Essa migração não foi implementada nesta passagem; não basta acrescentar output: export às rotas [id]. Nenhum upgrade foi ativado.
 
-Antes de deploy/rollback, impedir novas tarefas e aguardar pelas atuais: coordenação local, apenas um processo/instância. Reinício pode interromper tarefas; evidências persistem e a recuperação permite repetição seletiva, sem repetição externa automática garantida. Não escalar horizontalmente.
+[Render Free](https://render.com/docs/free): 750 horas/workspace/mês, suspensão após15min de inatividade, arranque cerca de1min, disco efémero. Sem cartão, esgotar banda pode suspender serviços e esgotar builds bloqueia novos builds. Pode suspender tráfego de saída invulgar. A observação anterior /health após horas inativo foi200 em22,52s; não é SLA. Um serviço, sem Redis, discos, keep-alive ou automações.
 
-Rollback da interface: versão anterior 320d69d3, verificando o novo domínio/CORS. Não reverter o subdomínio da conta sem nova decisão. Backend: escolher revisão PostgreSQL compatível; Render Free limita rollback aos dois deploys anteriores disponíveis. Os deploys iniciais falhados não são recuperação válida. Guardar snapshot/backup privado e ensaiar restauro numa base separada antes de alterações de dados; não foram feitos nesta passagem. Não fazer downgrade destrutivo nem trocar Neon por SQLite. Se houver dano, parar escritas e restaurar cópia verificada. Nenhum dump/segredo acompanha a entrega.
+[Neon Free](https://neon.com/docs/introduction/plans): 100CU-h/projeto/mês,1GB/projeto,5GB de transferência pública incluída, suspensão após5min; histórico até6h/limite documentado. Quotas atuais devem ser acompanhadas pela pessoa. Não prometer disponibilidade contínua. Backup/restauro remoto ainda não ensaiado. Sem serviços pagos, cartões ou domínios comprados.
+
+O backend completo não foi migrado para Python Workers: dependências CPython, tarefas, sockets, PDF e hashing continuam sem compatibilidade/CPU comprovada nesse runtime. A alternativa Render Free foi expressamente aprovada pela pessoa na conversa anterior.
+
+## Contas, credenciais e pendências
+
+A pessoa respondeu que **a rotação Neon ainda não foi feita**. Foi deixado aberto Neon Roles→Reset password e Render Environment para a introdução humana privada. O assistente não altera, lê ou apresenta passwords/URLs de base. A rotação deve ser feita na branch afetada e noutros locais onde a mesma credencial tenha sido reutilizada; depois atualizar pooled/direta no Render.
+
+Guia completo: CRIAR_CONTAS_PASSO_A_PASSO.md. Launcher local: Criar_Contas_Grupo.cmd, opções1/Tiago e2/Gonçalo, com inputs ocultos e preservação de contas existentes. Os launchers são desta máquina; não são para distribuir como instalação portátil. Outro ambiente usa o script existente scripts/provision_group.py com configuração preparada privadamente pela pessoa. O terceiro email ainda não foi indicado. Permitir email não cria conta. Usar a app não exige administrar os fornecedores. Cada conta vê apenas as suas investigações; não existe espaço partilhado.
+
+Falta a confirmação humana da rotação, contas e login, demo/PDF/isolamento/cold start remotos; validação real URLhaus; adequação CPU Free; terceiro elemento e backup/restauro. Tavily/Groq permanecem sem testes reais e dependem de pequeno orçamento confirmado. Não repetir lotes antigos. Chaves locais não aparecem automaticamente no alojamento.
+
+## Rollback e revisão
+
+Parar novas tarefas e aguardar as ativas antes de deploy/rollback; a coordenação é local e não suporta escala horizontal. Reinício pode interromper trabalhos, preservando evidências para repetição seletiva; não repetir fornecedores automaticamente.
+
+Par anterior funcional para rollback de código: frontend **f4273a1e-c607-4ba4-8f4e-22386e339d29**, backend **b75730959f77746621b4340647a1ae31813c86be**, deploy dep-dbd9npbrjlhs73cgrctg. Render Free permite os dois deploys anteriores disponíveis; confirmar a disponibilidade no painel. Preservar as credenciais atuais após rotação e CORS do domínio neutro: rollback de código não é restaurar segredos antigos. Não reverter o subdomínio da conta nem executar downgrade destrutivo. Não trocar Neon por SQLite. Para dano de dados, parar escritas e restaurar backup verificado numa base separada; ainda não ensaiado.
+
+Rever o PR e o manifesto cumulativo antes de integrar no trabalho do grupo. Nenhum merge/force-push ou alteração do main foi efetuado. Os documentos posteriores não alteram o código que está em execução.
