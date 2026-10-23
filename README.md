@@ -1,6 +1,6 @@
 # WebSecAI
 
-Projeto Engenharia de Software II 
+Projeto académico de Engenharia de Software II.
 
 ## Participantes
 
@@ -8,65 +8,72 @@ Projeto Engenharia de Software II
 - Tiago Melo
 - Gonçalo Cordeiro
 
-## Descrição do projeto
+## O projeto
 
-O WebSec AI pretende ser uma aplicação web de apoio à análise não intrusiva da postura básica de segurança de websites. Permitirá consultar verificações técnicas e compreender os resultados através de explicações e sugestões apoiadas por inteligência artificial.
+Aplicação web de apoio à análise da postura de segurança de websites e à investigação de referências públicas e indicadores de ameaças. Organiza resultados, evidências e limitações num histórico por utilizador, com exportação PDF.
 
-O projeto está na fase de definição. As funcionalidades seguintes são propostas iniciais a validar pelo grupo e com o docente, ainda não implementadas.
+As verificações técnicas destinam-se apenas a websites próprios ou autorizados. As consultas de Threat Intelligence não visitam automaticamente os URLs suspeitos. Ausência de correspondências não prova segurança e os resultados não constituem certificação nem prova de intrusão.
 
-## Âmbito inicial proposto
+## Funcionalidades
 
-- Verificações de DNS, HTTPS e certificados TLS.
-- Verificações de cabeçalhos HTTP de segurança e atributos de cookies.
-- Painel de resultados com evidências e recomendações.
-- Registo, autenticação e histórico por utilizador.
-- Exportação de relatórios.
-- Possível integração de um MCP para permitir que assistentes de inteligência artificial consultem os resultados e o histórico das análises de segurança web.
+- Contas, autenticação, histórico individual e autorização por dono.
+- Verificações DNS, HTTPS/TLS, cabeçalhos HTTP, cookies e ficheiros públicos, mediante autorização.
+- Investigação por domínio/link ou mensagem, evidências por fonte e comparação entre recolhas.
+- Relatórios PDF e repetição seletiva de fontes com falhas ou cobertura incompleta.
+- Demonstração com dados fictícios e sem consultas externas.
+- Adaptadores de Threat Intelligence e pesquisa pública, dependentes de configuração e acesso do fornecedor.
+- Síntese e perguntas apoiadas por IA, com referências a evidências e rejeição de saídas inválidas.
 
-### Papel da IA
+As chaves externas são opcionais por módulo. URLhaus tem adaptador e formulário local; a aceitação ao vivo nesta instalação ainda está pendente. MCP, grafos e uma funcionalidade própria de alteração de password não estão implementados.
 
-As verificações técnicas recolherão os dados. A IA receberá resultados estruturados para produzir explicações e sugestões associadas às evidências e sujeitas a validação. Modelo, fornecedor e custos serão definidos no levantamento de requisitos.
+## Tecnologias e estrutura
 
-### Limites
+FastAPI/Python, SQLAlchemy e Alembic no backend; Next.js, React e TypeScript na interface; ReportLab nos PDFs. SQLite mantém-se para desenvolvimento local e PostgreSQL está preparado para a instalação online.
 
-As análises destinam-se a websites próprios ou com autorização para teste. Não estão previstos exploração de vulnerabilidades, ataques de força bruta ou testes de carga. Os resultados não constituem uma certificação de segurança.
+| Caminho | Conteúdo |
+| --- | --- |
+| `codigo/backend` | API, modelos, migrações e testes |
+| `codigo/frontend` | Interface e adaptador Cloudflare |
+| `codigo/docs` | Documentação académica recebida |
+| `scripts/configurar_apis.ps1` | Formulário Windows com campos ocultos |
+| `docs` | Proveniência, README inicial e relatórios de validação |
+| `render.yaml` | Um serviço Render Free, sem deploy automático |
 
-## Referência
+## Executar localmente
 
-O projeto de referência utiliza FastAPI, Next.js e SQLite. As tecnologias do WebSec AI serão decididas pelo grupo. Este repositório contém a definição inicial; eventual reutilização de código deverá confirmar a licença e identificar a origem.
+Pré-requisitos: Python 3.12 e Node.js 22/24 com npm. No Windows, a partir da raiz do repositório:
 
-## Tecnologias Utilizadas
+```powershell
+cd codigo/backend
+py -3.12 -m venv .venv
+& .\.venv\Scripts\python.exe -m pip install -r requirements-dev.lock.txt
+& .\.venv\Scripts\python.exe scripts/setup_local.py
+& .\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
 
-- **Frontend:** Next.js, React e TypeScript para a interface web.
-- **Backend:** Python e FastAPI para a API e as verificações de segurança.
-- **Base de dados:** SQLite e SQLAlchemy para guardar utilizadores, análises e resultados.
-- **Inteligência artificial:** API de um modelo de linguagem, a definir, para explicar resultados e sugerir melhorias.
-- **MCP opcional:** SDK oficial MCP para Python para permitir a consulta de resultados e histórico por assistentes de IA.
-- **Relatórios:** ReportLab para gerar relatórios em PDF.
-- **Testes:** pytest para testar o backend e as verificações.
-- **Gestão do projeto:** GitHub para o código e GitHub Projects para as tarefas.
+Num segundo terminal:
 
-## WBS inicial
+```powershell
+cd codigo/frontend
+npm.cmd ci
+if (-not (Test-Path -LiteralPath .env.local)) { Copy-Item .env.example .env.local }
+npm.cmd run dev
+```
 
-A WBS divide o trabalho em entregáveis e tarefas. Responsáveis e datas serão acordados pelo grupo no GitHub Project.
+Abrir `http://127.0.0.1:3000`, criar uma conta local e escolher **Experimentar demonstração**. A configuração local gera um segredo aleatório sem o apresentar. Não enviar `.env`, bases ou chaves para o Git.
 
-| Código | Entregável | Trabalho previsto |
-| --- | --- | --- |
-| 1.1 | Definição | Confirmar objetivos, âmbito e participantes. |
-| 1.2 | Organização | Criar repositório e Project; definir tarefas e responsáveis. |
-| 2.1 | Requisitos | Identificar funcionalidades e critérios de aceitação. |
-| 2.2 | Casos de uso | Documentar autenticação, análise e consulta de resultados. |
-| 2.3 | Requisitos da IA | Definir entradas, respostas esperadas, limitações e orçamento. |
-| 3.1 | Arquitetura | Escolher tecnologias, componentes e integrações. |
-| 3.2 | Modelo de dados | Desenhar utilizadores, análises e resultados. |
-| 3.3 | Protótipos | Desenhar e validar os principais ecrãs. |
-| 4.1 | Verificações | Implementar verificações técnicas e resultados estruturados. |
-| 4.2 | Contas e histórico | Implementar autenticação, persistência e permissões. |
-| 4.3 | Interface | Implementar pedido de análise, painel e histórico. |
-| 4.4 | IA | Implementar explicações baseadas nos resultados e tratamento de falhas. |
-| 4.5 | Relatórios | Implementar exportação dos resultados. |
-| 5.1 | Testes técnicos | Validar verificações em websites de teste controlados. |
-| 5.2 | Avaliação da IA | Comparar explicações com evidências e identificar erros. |
-| 5.3 | Integração | Validar fluxos, permissões e funcionamento sem IA disponível. |
-| 6.1 | Documentação | Preparar instruções de execução, utilização e limitações. |
-| 6.2 | Entrega | Preparar demonstração e verificar requisitos do docente. |
+Para configurar URLhaus, abrir `codigo/Configurar_APIs.cmd` e introduzir a Auth-Key pessoalmente no campo oculto. Tavily/Groq não são necessárias para o teste isolado URLhaus. Consultar [a validação URLhaus](docs/VALIDACAO_URLHAUS.md) antes de efetuar pedidos reais.
+
+## Testes e publicação
+
+Backend: `python -m pytest -q` no ambiente virtual. Frontend: `npm run build`. Os testes de fornecedores usam respostas controladas; não comprovam autenticação real.
+
+O alojamento escolhido é **Neon Free + Render Free para a API + Cloudflare Free para a interface**, com subdomínios gratuitos. Criar contas nos fornecedores não significa que a app esteja publicada. Os segredos ficam no backend e são configurados pela pessoa nos painéis. Não colocar ligações PostgreSQL ou chaves em `NEXT_PUBLIC_*`.
+
+Na instalação online, o registo público fica fechado e as três contas do grupo são provisionadas privadamente. O histórico continua separado por dono. A app comum não cria automaticamente um espaço de investigação partilhado.
+
+Ver [validação e publicação](docs/VALIDACAO_PUBLICACAO.md) para o estado efetivo, quotas, testes remotos pendentes, cold starts e rollback.
+
+## Origem e evolução
+
+O código desta evolução parte do ZIP `WebSecAI_Continuacao_2026-10-22_v2.zip` fornecido pelo grupo. O GitHub continha apenas o README inicial; não foi usado como base presumida da aplicação. O [README anterior](docs/README_INICIAL_GITHUB.md) e o histórico foram preservados. O [manifesto original](docs/MANIFEST_SHA256.json) identifica o snapshot recebido.

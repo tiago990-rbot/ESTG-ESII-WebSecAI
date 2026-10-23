@@ -1,0 +1,10 @@
+.env
+.env.*
+*.db
+*.db-*
+.venv
+.cache
+__pycache__
+.pytest_cache
+tests
+*.log

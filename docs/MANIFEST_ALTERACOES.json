@@ -1,0 +1,240 @@
+{
+  "created_at_utc": "2026-10-22T13:30:15.704890+00:00",
+  "code_revision": "38b3c378ee1ad002850e1a2bf5cb7843ab0b2252",
+  "original_manifest_sha256": "c2d35dec720e28ac1737b01b498a1c79032c54aef2067cb10bf57c4688ede490",
+  "original_files_verified": 138,
+  "changed_code_files": 33,
+  "files": [
+    {
+      "path": "codigo/backend/.dockerignore",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "9dd4ca8df2c1118dc2756811ec835831b18431060235b036ad2e24892b675f8e",
+      "reason": "Configuração de alojamento sem segredos e preservação do ambiente local"
+    },
+    {
+      "path": "codigo/backend/.env.example",
+      "change": "modified",
+      "original_sha256": "2438dfa812f2c290f560d4d3a3c55e6d172f1826cfff736429315c2244e6e80d",
+      "delivered_sha256": "c73c56920b40df29d20a4fa4f201fcda8a625bfd0d7370c26cb9777a31da9e20",
+      "reason": "Configuração de alojamento sem segredos e preservação do ambiente local"
+    },
+    {
+      "path": "codigo/backend/Dockerfile",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "0e4cc01cdd01d7d1e88d6c18cd841e15288a1b642d89838ce970e2bf70981f60",
+      "reason": "Configuração de alojamento sem segredos e preservação do ambiente local"
+    },
+    {
+      "path": "codigo/backend/app/api/routes/auth.py",
+      "change": "modified",
+      "original_sha256": "8a0bab3dac4f8d9f57262227e5c222d96afc482715a549617e9c56aca622d4b0",
+      "delivered_sha256": "5bbb14fccc4965e1be95312521350e7b2d37b633bc9e88693fcbfe73c7f4fdf6",
+      "reason": "Acesso online restrito ao grupo e verificação de configuração"
+    },
+    {
+      "path": "codigo/backend/app/core/deployment.py",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "4e8e6c1afef5210756e5f24779e1b48422fbc7ceec8d3861267622b2ab74ea00",
+      "reason": "Acesso online restrito ao grupo e verificação de configuração"
+    },
+    {
+      "path": "codigo/backend/app/core/security.py",
+      "change": "modified",
+      "original_sha256": "86712ca3e9238a6d80d08413dcc8c3d0c54e92415e01fdc62540df980f2e257a",
+      "delivered_sha256": "9170ee7b0bdb14c6a1ac08dce5e5f2d7f146b24fd0b1f56cf1fc9a6d88f031a3",
+      "reason": "Acesso online restrito ao grupo e verificação de configuração"
+    },
+    {
+      "path": "codigo/backend/app/db/configuration.py",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "8aee8fff03f62c8d28acf5be5991ffc1207e8a360b1da7994f5c46e59c49aaad",
+      "reason": "PostgreSQL, migração direta, TLS e normalização UTC"
+    },
+    {
+      "path": "codigo/backend/app/db/session.py",
+      "change": "modified",
+      "original_sha256": "d75d1e533de3e199125d0758d5719c249ef395d9bbbcf1b0aedc9198521d0c29",
+      "delivered_sha256": "bd1269927592c4efc7e91c23f8cbc621b1f8a86bd090ade0bda2ea4a9352d560",
+      "reason": "PostgreSQL, migração direta, TLS e normalização UTC"
+    },
+    {
+      "path": "codigo/backend/app/db/types.py",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "d7dff118c8c913baf3b54a1e66deeeba8dcfb76082722b31520960e7bd1a5e2a",
+      "reason": "PostgreSQL, migração direta, TLS e normalização UTC"
+    },
+    {
+      "path": "codigo/backend/app/main.py",
+      "change": "modified",
+      "original_sha256": "da4e0aa5aaaa612954f9e8e87cc4fd102f5518a48b13eafe8e998f872977f9c1",
+      "delivered_sha256": "8f9bd5325e605d8b2d31579794806e0ef1b694f5d4016be7842a6bbafb9ecb38",
+      "reason": "Acesso online restrito ao grupo e verificação de configuração"
+    },
+    {
+      "path": "codigo/backend/app/models/investigation.py",
+      "change": "modified",
+      "original_sha256": "b95caf91fdb72a64adbf4be5a85258c361783ba8444da7bfd63eb2b577840e7f",
+      "delivered_sha256": "d50bb18dfd0a9a2bcdc87bdd550b3d8ff15c0eeb0d7d920ac9cfb29884a630d7",
+      "reason": "PostgreSQL, migração direta, TLS e normalização UTC"
+    },
+    {
+      "path": "codigo/backend/app/models/scan.py",
+      "change": "modified",
+      "original_sha256": "18ec7804c8dfe406048d54955427adef8d08d127f0dff14f6883b311390a5ee3",
+      "delivered_sha256": "6e5cfa7528d1892cbc64e32a62a72d1f491e02a2d6c98ec18b01a604f06d1fc6",
+      "reason": "PostgreSQL, migração direta, TLS e normalização UTC"
+    },
+    {
+      "path": "codigo/backend/app/models/user.py",
+      "change": "modified",
+      "original_sha256": "a22acbb569a72e0921f5a326c1a96950cd92451f89eb3a198c9fa70c485b6eb7",
+      "delivered_sha256": "10c398114b0f97e3a6381356fd4a1c18c53900ce8272e4092493f7414692482d",
+      "reason": "PostgreSQL, migração direta, TLS e normalização UTC"
+    },
+    {
+      "path": "codigo/backend/app/services/auth_service.py",
+      "change": "modified",
+      "original_sha256": "3ad33c88830f53d25c54656a02183e2cfac4f90d3d0724803e6772d4bfe7bd25",
+      "delivered_sha256": "f32d9906c4e5a8634b0f5926cbab8acbbe884962351f8da0686d1dc587fff7d1",
+      "reason": "Acesso online restrito ao grupo e verificação de configuração"
+    },
+    {
+      "path": "codigo/backend/migrations/env.py",
+      "change": "modified",
+      "original_sha256": "ad0986927a015a8c0f8a285914490786965652f28c839461d36d945836633ab1",
+      "delivered_sha256": "d6ca46c5009fda4be962ffa823a65a23a5b6b2da1290ba28507f8c2d44a41466",
+      "reason": "PostgreSQL, migração direta, TLS e normalização UTC"
+    },
+    {
+      "path": "codigo/backend/requirements-dev.lock.txt",
+      "change": "modified",
+      "original_sha256": "fb57add788cb6013d46aba79d906bf26432ce5da2427b1a092b7856cfd278db2",
+      "delivered_sha256": "bef7aab621f5a0927495429f6b7083e60a5796e78b0b5074534fcdf85c13a35c",
+      "reason": "Dependências PostgreSQL e certificados fixados"
+    },
+    {
+      "path": "codigo/backend/requirements.txt",
+      "change": "modified",
+      "original_sha256": "8f077e03dd735a69b21ba74cd4ebf7f451d3b91b7b3efb48d1e936d7a9234a50",
+      "delivered_sha256": "5793bbe09aa1658c0c4e877a138b716819e8d7936b95774cf3b05eeb94832a49",
+      "reason": "Dependências PostgreSQL e certificados fixados"
+    },
+    {
+      "path": "codigo/backend/scripts/provision_group.py",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "e64efa8cbe727212f22308ef4cdb6adb3a0084e0a9d6f506c338318e1934ecdd",
+      "reason": "Criação humana privada das três contas existentes no modelo de autenticação"
+    },
+    {
+      "path": "codigo/backend/scripts/start_hosted.py",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "995f1748e95b2893f6ef8afa1e23394ed792eed2c747630cc29219853deebbab",
+      "reason": "Configuração de alojamento sem segredos e preservação do ambiente local"
+    },
+    {
+      "path": "codigo/backend/scripts/validar_urlhaus.py",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "af11cb9ea459c7932087d7b9ed0854f12f0b5b179f880a2b8a81b5a3ba212958",
+      "reason": "Consulta isolada com estado seguro e máximo de duas tentativas"
+    },
+    {
+      "path": "codigo/backend/tests/conftest.py",
+      "change": "modified",
+      "original_sha256": "f600448178344d748a07c6e75b5b573ae410247e683ec8e8a9a2b465b2d4b8af",
+      "delivered_sha256": "f87061f6f3c74ae91283ca1ad6e4a1077318049e92b805ac150ba4348caee478",
+      "reason": "Regressão, isolamento, PostgreSQL e aceitação de navegador controlada"
+    },
+    {
+      "path": "codigo/backend/tests/e2e_backend.py",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "6d3e3691e4f1dda45725bff3cf60419dba802edd98c03d4b9a443ad1c1cc915a",
+      "reason": "Regressão, isolamento, PostgreSQL e aceitação de navegador controlada"
+    },
+    {
+      "path": "codigo/backend/tests/test_deployment.py",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "b196d90d1e065841baf828e92f1fec5b83b6e123566735bdb93a33b29de0fb79",
+      "reason": "Regressão, isolamento, PostgreSQL e aceitação de navegador controlada"
+    },
+    {
+      "path": "codigo/backend/tests/test_urlhaus_validation.py",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "4c73c0e6522c5c67776d6c4fa56cdba089d91356f99533a3345305cebb5bd686",
+      "reason": "Regressão, isolamento, PostgreSQL e aceitação de navegador controlada"
+    },
+    {
+      "path": "codigo/frontend/.gitignore",
+      "change": "modified",
+      "original_sha256": "adabb19c4341e63affd3044815636cbca7fea449bfa87de29506cb501877076f",
+      "delivered_sha256": "c3f3a3f6e6d321499442271c9e232f68a023c07684cd4fb132462f0dc5592ded",
+      "reason": "Adaptador Cloudflare com versões fixadas e preservação das rotas dinâmicas"
+    },
+    {
+      "path": "codigo/frontend/open-next.config.ts",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "605f89cb669257ae26a565312c13d762bd8b1ed6a4046be1f2fc485d0dbb8064",
+      "reason": "Adaptador Cloudflare com versões fixadas e preservação das rotas dinâmicas"
+    },
+    {
+      "path": "codigo/frontend/package-lock.json",
+      "change": "modified",
+      "original_sha256": "2299d7a2fda9e96a89c122ebc1af9e2480d75126f5074404038cbe70b783a7a9",
+      "delivered_sha256": "413dcc79d72f44fe7fa2b7f3f890f9e745107bcc332df82e9bd148a1e68af7a5",
+      "reason": "Adaptador Cloudflare com versões fixadas e preservação das rotas dinâmicas"
+    },
+    {
+      "path": "codigo/frontend/package.json",
+      "change": "modified",
+      "original_sha256": "9850912be04cbf4f357b657d9a337d50996d6e9031f2950f5f268495620b04fc",
+      "delivered_sha256": "47552537b60879e4009b849ba77de2cd1cebfc69f612a8034172562aa4d625a0",
+      "reason": "Adaptador Cloudflare com versões fixadas e preservação das rotas dinâmicas"
+    },
+    {
+      "path": "codigo/frontend/scripts/build-cloudflare.mjs",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "eac5a59571e8c7980642a4cee9ed8c09acd8b9632598b1e0caf4b12ee2e26d85",
+      "reason": "Adaptador Cloudflare com versões fixadas e preservação das rotas dinâmicas"
+    },
+    {
+      "path": "codigo/frontend/wrangler.jsonc",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "ec4c1bd292ae7080f06e397b93b70f7c8f3b7c557d1bc10d8e2ad837dc77eb79",
+      "reason": "Adaptador Cloudflare com versões fixadas e preservação das rotas dinâmicas"
+    },
+    {
+      "path": "codigo/tests/deployment-browser.mjs",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "b3ed35611473fd5a150c1e748a2a31a1532a35f7aa75d9281c5a00990a9b9876",
+      "reason": "Regressão, isolamento, PostgreSQL e aceitação de navegador controlada"
+    },
+    {
+      "path": "codigo/tests/restart-browser.mjs",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "6538c23f175945c89f1cd56e701c2d6d496364384d422e9dd347abdf232bea33",
+      "reason": "Regressão, isolamento, PostgreSQL e aceitação de navegador controlada"
+    },
+    {
+      "path": "render.yaml",
+      "change": "added",
+      "original_sha256": null,
+      "delivered_sha256": "50c051b3ad2ec8595d9518c372ed1f9d5d626ec00257320365f1adf6853ac2f7",
+      "reason": "Render Free escolhido pela pessoa; serviço único e deploy automático desligado"
+    }
+  ]
+}
