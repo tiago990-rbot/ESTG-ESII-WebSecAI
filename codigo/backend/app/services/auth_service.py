@@ -31,11 +31,11 @@ def register_user(db: Session, data: UserCreate) -> User:
 def login_user(db: Session, data: LoginRequest) -> TokenResponse:
     identifier = data.username_or_email.strip().lower()
     user = db.query(User).filter(or_(User.username == data.username_or_email.strip(), User.email == identifier)).first()
-    if not user or not verify_password(data.password, user.password_hash):
+    if not user or not user.password_ready or not verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas")
     check_member(user.email)
     if user.password_hash.startswith("pbkdf2_sha256$"):
         user.password_hash = hash_password(data.password)
         db.commit()
-    token = create_access_token(str(user.id))
+    token = create_access_token(str(user.id), auth_version=user.auth_version)
     return TokenResponse(access_token=token)

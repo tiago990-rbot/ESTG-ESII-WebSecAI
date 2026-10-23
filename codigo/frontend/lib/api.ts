@@ -39,10 +39,10 @@ export function clearToken() {
   notifyAuthChanged();
 }
 
-export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+export async function request<T>(path: string, options: RequestInit = {}, authenticated = true): Promise<T> {
   const headers = new Headers(options.headers || {});
   if (!headers.has("Content-Type") && options.body) headers.set("Content-Type", "application/json");
-  const token = getToken();
+  const token = authenticated ? getToken() : null;
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
@@ -60,6 +60,12 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
 }
 
 export const api = {
+  changePassword: (payload: { current_password: string; new_password: string; confirmation: string }) =>
+    request<void>("/api/v1/auth/password/change", { method: "POST", body: JSON.stringify(payload), cache: "no-store" }),
+
+  resetPassword: (payload: { token: string; new_password: string; confirmation: string }) =>
+    request<void>("/api/v1/auth/password/reset", { method: "POST", body: JSON.stringify(payload), cache: "no-store" }, false),
+
   authConfiguration: (signal?: AbortSignal) =>
     request<{ public_registration_enabled: boolean }>("/api/v1/auth/configuration", { signal }),
 

@@ -41,9 +41,9 @@ def verify_password(password: str, password_hash: str) -> bool:
     except (ValueError, TypeError):
         return False
 
-def create_access_token(subject: str, expires_delta: timedelta | None = None) -> str:
+def create_access_token(subject: str, expires_delta: timedelta | None = None, auth_version: int = 0) -> str:
     now = datetime.now(timezone.utc)
-    return jwt.encode({"sub": subject, "iat": now, "exp": now + (expires_delta or timedelta(hours=24))}, token_secret(), algorithm="HS256")
+    return jwt.encode({"sub": subject, "ver": auth_version, "iat": now, "exp": now + (expires_delta or timedelta(hours=24))}, token_secret(), algorithm="HS256")
 
 def decode_access_token(token: str) -> dict:
     try:
@@ -61,6 +61,8 @@ def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(
     user = db.get(User, int(payload["sub"]))
     if user is None:
         raise HTTPException(401, "Utilizador não encontrado")
+    if not user.password_ready or type(payload.get("ver", 0)) is not int or payload.get("ver", 0) != user.auth_version:
+        raise HTTPException(401, "Sessão terminada. Entre novamente.")
     from app.core.deployment import check_member
     check_member(user.email)
     return user

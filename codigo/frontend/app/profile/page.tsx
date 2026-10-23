@@ -3,6 +3,7 @@
 import AuthGuard from "@/components/AuthGuard";
 import SectionCard from "@/components/SectionCard";
 import StatCard from "@/components/StatCard";
+import ChangePassword from "@/components/ChangePassword";
 import { api } from "@/lib/api";
 import { formatDate, riskLabel } from "@/lib/scan-helpers";
 import type { ScanListItem, ScanStats, User } from "@/lib/types";
@@ -98,6 +99,8 @@ export default function ProfilePage() {
             {topDomain && <p className="muted smallNote">Domínio mais frequente: {topDomain.domain}</p>}
           </SectionCard>
         </div>
+
+        <ChangePassword />
 
         <SectionCard title="Últimas análises deste utilizador">
           {scans.length === 0 ? (

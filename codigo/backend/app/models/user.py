@@ -1,6 +1,6 @@
 from app.db.types import UTCDateTime as DateTime
 from datetime import datetime, timezone
-from sqlalchemy import Integer, String
+from sqlalchemy import Boolean, Integer, String, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
@@ -12,6 +12,8 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(80), unique=True, index=True, nullable=False)
     email: Mapped[str] = mapped_column(String(160), unique=True, index=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    auth_version: Mapped[int] = mapped_column(Integer, default=0, server_default=text("0"), nullable=False)
+    password_ready: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     scans = relationship("Scan", back_populates="user", cascade="all, delete-orphan")

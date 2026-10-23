@@ -2,7 +2,7 @@ from alembic import context
 from app.db.base import Base
 from app.db.configuration import migration_url, build_engine
 from app.models import user, scan, finding
-from app.models import investigation
+from app.models import investigation, account_action
 
 config = context.config
 DATABASE_URL = migration_url()
