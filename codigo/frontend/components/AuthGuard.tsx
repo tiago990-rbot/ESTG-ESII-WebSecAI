@@ -1,6 +1,6 @@
 "use client";
 
-import { getToken } from "@/lib/api";
+import { getToken, onAuthChanged } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 
@@ -9,11 +9,13 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!getToken()) {
-      router.push("/login");
-    } else {
-      setReady(true);
-    }
+    const sync = () => {
+      const hasToken = Boolean(getToken());
+      setReady(hasToken);
+      if (!hasToken) router.replace("/login");
+    };
+    sync();
+    return onAuthChanged(sync);
   }, [router]);
 
   if (!ready) return <main className="container"><p>A verificar sessão...</p></main>;

@@ -5,9 +5,15 @@ from app.db.session import get_db
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.user import UserCreate, UserResponse
 from app.services.auth_service import login_user, register_user
-from app.core.deployment import auth_attempt
+from app.core.deployment import auth_attempt, production
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
+
+
+@router.get("/configuration")
+def configuration():
+    # Public UI policy only: never expose member emails or private settings.
+    return {"public_registration_enabled": not production()}
 
 
 @router.post("/register", response_model=UserResponse)

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, setToken } from "@/lib/api";
 import SectionCard from "@/components/SectionCard";
+import { AuthConfigurationNotice, useAuthConfiguration } from "@/components/AuthConfiguration";
+import SlowRequestNotice from "@/components/SlowRequestNotice";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,9 +15,11 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { registrationOpen } = useAuthConfiguration();
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    if (registrationOpen !== true) return;
     setError("");
     setLoading(true);
     try {
@@ -30,6 +34,14 @@ export default function RegisterPage() {
     }
   }
 
+  if (registrationOpen !== true) return <main className="container">
+    <SectionCard title={registrationOpen === false ? "Acesso reservado ao grupo" : "Criação de conta"}>
+      <AuthConfigurationNotice />
+      {registrationOpen === false ? <p>As contas desta instalação são criadas privadamente pelo responsável do grupo. Se a tua conta já foi criada, podes entrar.</p> : null}
+      <div className="actions"><Link className="btn primary" href="/login">Fazer login</Link></div>
+    </SectionCard>
+  </main>;
+
   return (
     <main className="container">
       <div className="grid two">
@@ -43,6 +55,7 @@ export default function RegisterPage() {
             <label htmlFor="register-password">Palavra-passe</label>
             <input id="register-password" className="input" autoComplete="new-password" minLength={8} required placeholder="Palavra-passe" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             <button className="btn primary" disabled={loading}>{loading ? "A criar..." : "Criar conta"}</button>
+            <SlowRequestNotice pending={loading} />
           </form>
         </SectionCard>
         <SectionCard title="Já tens conta?">

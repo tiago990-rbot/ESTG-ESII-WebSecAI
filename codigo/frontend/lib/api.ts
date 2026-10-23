@@ -47,6 +47,7 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
 
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
   if (!response.ok) {
+    if (response.status === 401 && token) clearToken();
     let message = `Erro ${response.status}`;
     try {
       const data = await response.json();
@@ -59,6 +60,9 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
 }
 
 export const api = {
+  authConfiguration: (signal?: AbortSignal) =>
+    request<{ public_registration_enabled: boolean }>("/api/v1/auth/configuration", { signal }),
+
   register: (payload: { username: string; email: string; password: string }) =>
     request<User>("/api/v1/auth/register", { method: "POST", body: JSON.stringify(payload) }),
 

@@ -1,0 +1,16 @@
+[
+  {
+    "repository": "WebSecAI",
+    "files": 25,
+    "before_after_match": true,
+    "combined_patch_check": false,
+    "integration": "exact attached files matched by SHA256"
+  },
+  {
+    "repository": "github-integration",
+    "files": 25,
+    "before_after_match": true,
+    "combined_patch_check": false,
+    "integration": "exact attached files matched by SHA256"
+  }
+]

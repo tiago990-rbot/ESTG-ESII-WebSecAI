@@ -52,12 +52,14 @@ export default function DashboardPage() {
       <main className="container">
         <div className="dashboardIntro">
           <div>
-            <span className="eyebrow">Painel principal</span>
-            <h1>Dashboard</h1>
-            <p className="muted">Cria análises, acompanha scores e consulta o histórico de segurança.</p>
+            <span className="eyebrow">Dimensão técnica · WebSec Check</span>
+            <h1>Análise técnica</h1>
+            <p className="muted">Verifica a configuração de websites autorizados e acompanha a sua evolução.</p>
           </div>
           <Link className="btn" href="/history">Ver histórico completo</Link>
         </div>
+
+        <p className="notice" style={{ marginBottom: 24 }}>O score descreve a configuração técnica. Para cruzar notícias, indicadores e fontes de ameaças, <Link className="sourceLink" href="/investigations">abre uma investigação →</Link>.</p>
 
         <div className="statGrid">
           <StatCard title="Total de scans" value={stats?.total_scans ?? 0} description="Análises guardadas" />

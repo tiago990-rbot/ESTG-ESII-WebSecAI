@@ -8,12 +8,23 @@ const { chromium } = require("playwright");
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 try {
   const context = await browser.newContext();
+  await context.route("**/*", async route => {
+    const target = new URL(route.request().url());
+    if (target.hostname === "websecaiapi.onrender.com") {
+      const response = await route.fetch({ url: "http://127.0.0.1:8000" + target.pathname + target.search });
+      return route.fulfill({ response });
+    }
+    if (!["127.0.0.1", "localhost"].includes(target.hostname)) return route.abort();
+    return route.continue();
+  });
   await context.addInitScript(token => localStorage.setItem("websec_token", token), process.env.TEST_SESSION_TOKEN);
   const page = await context.newPage();
   await page.goto("http://127.0.0.1:3000/investigations", { waitUntil: "networkidle" });
+  await page.locator(".investigationRow").first().waitFor();
   assert.equal(await page.locator(".investigationRow").count(), 1);
   await page.locator(".investigationRow").click();
   await page.waitForURL(/\/investigations\/[a-f0-9-]+$/);
+  await page.getByRole("tab", { name: /^Evidências/ }).click();
   await page.locator(".evidenceItem").first().waitFor();
   await page.getByText("Concluída", { exact: true }).waitFor();
   assert.equal(await page.locator(".evidenceItem").count(), 4);

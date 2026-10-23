@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, setToken } from "@/lib/api";
 import SectionCard from "@/components/SectionCard";
+import { AuthConfigurationNotice, useAuthConfiguration } from "@/components/AuthConfiguration";
+import SlowRequestNotice from "@/components/SlowRequestNotice";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,6 +14,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { registrationOpen } = useAuthConfiguration();
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -39,11 +42,15 @@ export default function LoginPage() {
             <label htmlFor="login-password">Palavra-passe</label>
             <input id="login-password" className="input" autoComplete="current-password" required placeholder="Palavra-passe" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             <button className="btn primary" disabled={loading}>{loading ? "A entrar..." : "Entrar"}</button>
+            <SlowRequestNotice pending={loading} />
           </form>
         </SectionCard>
-        <SectionCard title="Ainda não tens conta?">
-          <p className="muted">Cria uma conta para guardar histórico de análises e gerar relatórios.</p>
-          <Link className="btn" href="/register">Criar conta</Link>
+        <SectionCard title={registrationOpen === true ? "Ainda não tens conta?" : "Acesso ao grupo"}>
+          <AuthConfigurationNotice />
+          {registrationOpen === true ? <>
+            <p className="muted">Cria uma conta para guardar histórico de análises e gerar relatórios.</p>
+            <Link className="btn" href="/register">Criar conta</Link>
+          </> : registrationOpen === false ? <p className="muted">As contas desta instalação são criadas pelo responsável. Se ainda não tens acesso, pede-lhe que crie a tua conta. Depois entra com o teu username ou email.</p> : null}
         </SectionCard>
       </div>
     </main>

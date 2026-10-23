@@ -14,7 +14,7 @@ export default function AboutPage() {
         </SectionCard>
         <SectionCard title="Funcionalidades">
           <ul>
-            <li>Registo e login de utilizadores</li>
+            <li>Contas individuais e login; acesso do grupo configurado pelo responsável</li>
             <li>Histórico individual de análises</li>
             <li>Análise DNS, TLS e HTTP</li>
             <li>Score e findings com recomendações</li>
