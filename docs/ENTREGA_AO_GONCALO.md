@@ -1,14 +1,25 @@
-# Entrega e continuação WebSecAI — v5 integrada, 23/10/2026
+# Entrega e continuação WebSecAI — v7 integrada, 23/10/2026
+
+Receção cumulativa:38 ficheiros de código conferidos,18 alterados/adicionados sobre a v5, mais adaptação dos dois harnesses de navegador. Método: igualdade por SHA256 contra before original/after v5/after v7, sem forçar patch cumulativo sobre alterações já integradas. Autenticação, autorização, PostgreSQL, TLS, migrações diretas, quotas e alojamento preservados. Sem dependências, migrações ou tabelas novas.
+
+Fonte localf80789d7b7de21923bbac699ebfdee7ae43ac3b6; GitHub52b8de6b5d95b26ae9d5670122a34e8773bb31e9; Renderdep-dbdlu6g473hc73cqt16g; Cloudflaref791d444-11d9-4f4a-9ef6-9fa0808738e8. Ramo codex/publicacao-gratuita/PR19, main preservado.141 testes PostgreSQL e testes JS/build/navegador/PDF aprovados. Código online; login/PDF reais do grupo e estabilidade Free pendentes.
+
+O relatório estruturado acrescenta conclusões, correlações cautelosas, seis respostas, prioridades e lacunas. O PDF gera cronologia de três datas e mapa de proveniência a partir do snapshot guardado, sem recolha nova. O exemplo entregue é fictício,9páginas,29ligações internas válidas/2externas não visitadas. Não é avaliação de modelo real.
+
+Ver VALIDACAO_PUBLICACAO.md para testes, risco CPU, rollback e pendências. Zero consultas reais URLhaus/Tavily/Groq, nenhum serviço pago ou credencial incluída. O patch de devolução atual é cumulativo sobre o ZIP original v2; começar por git apply --check e integrar por comparação se o grupo evoluiu. Não substituir bases/ambientes privados. Os documentos recebidos do Gonçalo estão preservados em docs/revisao-v7 no ramo.
+
+
+## Continuidade e limites já registados
 
 Interface: https://websecai-frontend.websecai-estg.workers.dev — API: https://websecaiapi.onrender.com.
 
 As melhorias v5 do Gonçalo estão integradas: identidade, arquivo/formulário, filtros, cronologia, mapa de proveniência e correções de acesso/sessão. O registo público continua fechado e a interface agora explica o acesso ao grupo.
 
-Código GitHub: af196b2780916e3aa2029cc1d1c1e0352471df0d. Usar o ramo **codex/publicacao-gratuita**, não main: https://github.com/tiago990-rbot/ESTG-ESII-WebSecAI/tree/codex/publicacao-gratuita. Revisão no PR #19: https://github.com/tiago990-rbot/ESTG-ESII-WebSecAI/pull/19. Render Live dep-dbdjdmon74is7390qdog; Cloudflare cf9dd8ba-9473-4980-871f-395be87334e0. Relatórios posteriores não mudam a revisão executada.
+Código GitHub: 52b8de6b5d95b26ae9d5670122a34e8773bb31e9. Usar o ramo **codex/publicacao-gratuita**, não main: https://github.com/tiago990-rbot/ESTG-ESII-WebSecAI/tree/codex/publicacao-gratuita. Revisão no PR #19: https://github.com/tiago990-rbot/ESTG-ESII-WebSecAI/pull/19. Render Live dep-dbdlu6g473hc73cqt16g; Cloudflare f791d444-11d9-4f4a-9ef6-9fa0808738e8. Relatórios posteriores não mudam a revisão executada.
 
-114 testes PostgreSQL e testes JS passaram. No navegador local workerd+FastAPI+PostgreSQL: três contas sintéticas, demo/PDF/isolamento, cronologia/mapa/teclado, móvel e reinício passaram. Houve publicação remota real e testes públicos HTTP/política/CORS. Não houve login real do grupo nem consultas reais a fornecedores. Ver VALIDACAO_PUBLICACAO.md.
+141 testes PostgreSQL e testes JS passaram. No navegador local workerd+FastAPI+PostgreSQL: três contas sintéticas, demo/PDF/isolamento, cronologia/mapa/teclado, móvel e reinício passaram. Houve publicação remota real e testes públicos HTTP/política/CORS. Não houve login real do grupo nem consultas reais a fornecedores. Ver VALIDACAO_PUBLICACAO.md.
 
-Pendências: a pessoa ainda não confirmou rotação da credencial Neon exposta; seguir CRIAR_CONTAS_PASSO_A_PASSO.md e criar contas privadamente. Falta aceitar demo/PDF/isolamento online e identificar o terceiro email. O frontend continua com consumo CPU acima do teto Free na pequena amostra inicial: 6 invocações, mediana247,35ms,0erros; não é aceitação de estabilidade. Preparar uma solução estática/cliente no mesmo Cloudflare, com testes e sem plano pago, se for a próxima tarefa autorizada. Backup/restauro remoto também está pendente.
+Pendências: a pessoa ainda não confirmou rotação da credencial Neon exposta; seguir CRIAR_CONTAS_PASSO_A_PASSO.md e criar contas privadamente. Falta aceitar demo/PDF/isolamento online e identificar o terceiro email. A medicao anterior da v5 mostrou consumo CPU acima do teto Free na pequena amostra inicial: 6 invocações, mediana247,35ms,0erros; não é aceitação de estabilidade. Preparar uma solução estática/cliente no mesmo Cloudflare, com testes e sem plano pago, se for a próxima tarefa autorizada. Backup/restauro remoto também está pendente.
 
 Para uma instalação nova, clonar o ramo acima. Para uma cópia do grupo já alterada, preservar dados e configuração privada, criar um ramo de integração e comparar manifesto/patch. O pacote WebSecAI_devolucao_alteracoes.zip contém apenas alterações cumulativas sobre o ZIP original v2; não é uma pasta completa. Ver INTEGRACAO_DO_PATCH.md. A base foi o ZIP v2, não o GitHub. O patch recebido v5 era cumulativo v4/v5 e foi integrado por ficheiros/hashes, sem forçar conflitos. A devolução atual contém um novo patch cumulativo validado sobre a base original.
 

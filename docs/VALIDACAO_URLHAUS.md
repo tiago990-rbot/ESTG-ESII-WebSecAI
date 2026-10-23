@@ -18,7 +18,7 @@
 
 - Código do ZIP v2, sem usar o GitHub como base. Manifesto original: 138 ficheiros verificados, zero diferenças.
 - SHA-256 do ZIP: `df9059a722c9b426fb573ba8f1b5bb801009d7ebaa8e7672abf19da0a53fde63`.
-- Revisão local preparada: `1077eb7c9fa4e5e7d53e21d1eea6f196226dfe6c`, ramo `codex/publicacao-gratuita`.
+- Revisão local preparada: `f80789d7b7de21923bbac699ebfdee7ae43ac3b6`, ramo `codex/publicacao-gratuita`.
 - Windows, Python 3.12.14, httpx 0.28.1. Verificação inicial isolada em `2026-10-22T12:57:22.511555+00:00`: chave ausente, zero pedidos.
 - A conversa partilhada não abriu no assistente. Foram usados os documentos do ZIP.
 
@@ -62,3 +62,7 @@ Revisão final de regressão: 113 testes aprovados em PostgreSQL local. A public
 ## Atualização de 23/10/2026
 
 Revisão v5 integrada/publicada,114 testes PostgreSQL locais aprovados. Zero consultas reais URLhaus/Tavily/Groq nesta continuação. Não houve nova leitura de presença de chaves; not_configured descreve a última verificação isolada, não uma inspeção atual dos segredos do Render.
+
+## Continuação v7
+
+141 testes PostgreSQL aprovados. Código v7 integrado/publicado, sem novas consultas URLhaus/Tavily/Groq ou inspeção de chaves. Mantêm-se os estados e o limite global de duas tentativas reais desta passagem.
