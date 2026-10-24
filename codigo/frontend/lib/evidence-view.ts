@@ -1,6 +1,6 @@
 import type { Evidence } from "./investigations";
 
-export const providerNames: Record<string, string> = {
+export const providerNames: Record<string, string> = { hibp_catalog: "HIBP — metadados públicos", urlscan: "urlscan — pesquisa passiva",
   osint: "Pesquisa pública", ai: "Síntese IA", technical: "Verificações técnicas",
   urlhaus: "URLhaus", phishtank: "PhishTank", kev: "CISA KEV", exposure: "Exposição de dados", message: "Regras da mensagem",
 };

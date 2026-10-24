@@ -51,7 +51,7 @@ def test_format_fallback_is_bounded_and_keeps_reference_validation(monkeypatch):
     with pytest.raises(ValueError, match="referências inexistentes"):
         ai_service.generate(case["evidence"], case["target"], case["runs"])
     assert formats == ["json_schema", "json_object"]
-    assert len(reservations) == 2
+    assert len(reservations) == 4  # Daily and minute admission for both attempted calls.
 
 
 def test_quota_failure_never_triggers_format_fallback(monkeypatch):

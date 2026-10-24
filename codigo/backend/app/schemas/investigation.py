@@ -9,6 +9,7 @@ class InvestigationCreate(BaseModel):
     message: str = Field(default="", max_length=8000)
     technical: bool = False
     authorized: bool = False
+    optional_sources: list[Literal["phishtank", "exposure", "hibp_catalog", "urlscan"]] = Field(default_factory=list, max_length=4)
     demo: bool = False
     @model_validator(mode="after")
     def check_input(self):
@@ -78,5 +79,13 @@ class Question(BaseModel):
 
 class RetryRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    provider: Literal["technical", "urlhaus", "phishtank", "osint", "exposure", "kev", "ai"]
+    provider: Literal["hibp_catalog", "urlscan", "technical", "urlhaus", "phishtank", "osint", "exposure", "kev", "ai"]
     authorized: bool = False
+
+
+class EvidenceReviewCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    status: Literal["unreviewed", "reviewed", "contested"]
+    identity_status: Literal["unverified", "matches", "does_not_match", "uncertain"]
+    note: str = Field(default="", max_length=2000)
+    previous_review_id: int | None = Field(default=None, ge=1)

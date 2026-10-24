@@ -23,8 +23,10 @@ else:
     os.environ["DATABASE_MIGRATION_URL"] = ""
 os.environ["APP_ENV"] = "local"
 os.environ["JWT_SECRET"] = secrets.token_urlsafe(48)
-for key in ("TAVILY_API_KEY", "GROQ_API_KEY", "URLHAUS_AUTH_KEY", "PHISHTANK_API_KEY", "HIBP_API_KEY", "HIBP_VERIFIED_DOMAINS"):
+for key in ("TAVILY_API_KEY", "GROQ_API_KEY", "URLHAUS_AUTH_KEY", "PHISHTANK_API_KEY", "HIBP_API_KEY", "HIBP_VERIFIED_DOMAINS", "URLSCAN_API_KEY", "PHISHTANK_ANONYMOUS_ENABLED", "TI_ACCEPTANCE_ENABLED"):
     os.environ[key] = ""
+for key in ("PHISHTANK_DAILY_LIMIT", "HIBP_CATALOG_DAILY_LIMIT", "URLSCAN_DAILY_LIMIT"):
+    os.environ[key] = "0"
 from fastapi.testclient import TestClient
 from app.main import app
 from app.db.base import Base

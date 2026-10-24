@@ -1,8 +1,9 @@
 import { request, getToken, API_BASE } from "./api";
 
-export type Provider = { id: string; name: string; configured: boolean; purpose: string; implemented: boolean; access_requirement: string; setup_note: string; documentation_url: string };
+export type Provider = { id: string; name: string; configured: boolean; purpose: string; implemented: boolean; access_requirement: string; setup_note: string; documentation_url: string; group?: string; ready?: boolean };
 export type ProviderRun = { provider: string; status: string; message: string; results_count: number; observed_at: string };
-export type Evidence = { id: string; provider: string; category: string; title: string; description: string; source_url: string; confirmation: string; published_at: string | null; event_at: string | null; observed_at: string; meta: Record<string, unknown> };
+export type EvidenceReview = { id: number; author_id: number; author: string; status: string; identity_status: string; note: string; created_at: string; is_current: boolean };
+export type Evidence = { id: string; provider: string; category: string; title: string; description: string; source_url: string; confirmation: string; published_at: string | null; event_at: string | null; observed_at: string; meta: Record<string, unknown>; review?: EvidenceReview; reviews?: EvidenceReview[] };
 export type Claim = { text: string; evidence_ids: string[] };
 export type Confidence = "low" | "medium" | "high";
 export type IntelligenceAnalysis = {
@@ -23,7 +24,7 @@ export type Investigation = InvestigationListItem & {
   coverage_summary: { origin: "local_rules"; has_target_evidence: boolean; target_evidence_count: number; notes: string[] };
   incident_grouping: { origin: "local_rules"; groups: { id: string; reason: string; status: string; event_at: string | null; kind: string; evidence_ids: string[]; source_urls: string[]; note: string }[]; ungrouped_evidence_ids: string[]; limitation: string };
 };
-export type NewInvestigation = { kind: "domain" | "message"; target: string; organization: string; product: string; message: string; technical: boolean; authorized: boolean; demo: boolean };
+export type NewInvestigation = { kind: "domain" | "message"; target: string; organization: string; product: string; message: string; technical: boolean; authorized: boolean; demo: boolean; optional_sources?: string[] };
 export type Comparison = { previous_id: string | null; added: string[]; removed: string[]; message: string };
 
 export const investigations = {
@@ -34,6 +35,7 @@ export const investigations = {
   compare: (id: string) => request<Comparison>("/api/v1/investigations/" + id + "/comparison"),
   ask: (id: string, text: string) => request<{ model: string; report: AnalystReport }>("/api/v1/investigations/" + id + "/questions", { method: "POST", body: JSON.stringify({ text }) }),
   retry: (id: string, provider: string, authorized = false) => request<{ id: string; provider: string; status: string }>("/api/v1/investigations/" + id + "/retry", { method: "POST", body: JSON.stringify({ provider, authorized }) }),
+  review: (id: string, evidenceId: string, data: { status: string; identity_status: string; note: string; previous_review_id: number | null }) => request<Investigation>("/api/v1/investigations/" + id + "/evidence/" + evidenceId + "/reviews", { method: "POST", body: JSON.stringify(data) }),
   remove: (id: string) => request<void>("/api/v1/investigations/" + id, { method: "DELETE" }),
 };
 

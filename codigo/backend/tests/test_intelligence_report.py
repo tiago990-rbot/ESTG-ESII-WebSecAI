@@ -94,14 +94,14 @@ def test_new_generation_uses_full_contract_and_bounded_context(monkeypatch):
         return {"choices": [{"message": {"content": json.dumps(raw)}}]}
     monkeypatch.setattr(providers, "json_request", respond)
     report, model = ai_service.generate(data["evidence"], data["target"], data["runs"])
-    assert report["intelligence"] and len(requests) == len(reservations) == 1
+    assert report["intelligence"] and len(requests) == 1 and len(reservations) == 2
     request = requests[0]
     assert request["response_format"]["json_schema"]["strict"]
     context = json.loads(request["messages"][1]["content"])
     assert context["standard_questions"] == QUESTIONS
     assert "do-not-send" not in json.dumps(context)
     assert context["selection"]["included"] <= 24
-    assert request["max_completion_tokens"] == 4600
+    assert request["max_completion_tokens"] == 3000
     def assert_closed(node):
         if isinstance(node, dict):
             if node.get("type") == "object":

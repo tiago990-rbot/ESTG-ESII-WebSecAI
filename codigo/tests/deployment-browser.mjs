@@ -51,7 +51,11 @@ try {
     await page.waitForURL(/\/investigations\/[a-f0-9-]+$/);
     await page.getByText("Concluída", { exact: true }).waitFor();
     await page.getByRole("tab", { name: /^Evidências/ }).click();
-    assert.equal(await page.locator(".evidenceItem").count(), 7);
+    assert.equal(await page.locator(".evidenceItem").count(), 6);
+    await page.getByRole("tab", { name: "Contexto global", exact: true }).click();
+    assert.equal(await page.locator(".evidenceItem").count(), 1);
+    await page.getByRole("heading", { name: "Contexto global sem associação demonstrada ao alvo" }).waitFor();
+    await page.getByRole("tab", { name: /^Evidências/ }).click();
     await page.locator(".demoBanner").waitFor();
     if (i === 0) demoId = new URL(page.url()).pathname.split("/").at(-1);
     const downloading = page.waitForEvent("download");
@@ -77,6 +81,16 @@ try {
     await page.locator(".wb-answer summary").filter({ hasText: "O histórico e a configuração atual estão relacionados?" }).click();
     assert.equal(await page.locator(".wb-answer[open]").count(), 1);
     await page.getByRole("tab", { name: /^Evidências/ }).click();
+    if (i === 0) {
+      const card = page.locator(".evidenceItem").first();
+      await card.getByText("Revisão humana · Por rever", { exact: true }).click();
+      await card.getByLabel("Estado da revisão", { exact: true }).selectOption("reviewed");
+      await card.getByLabel("Relação com a organização", { exact: true }).selectOption("uncertain");
+      await card.getByLabel("Notas e fundamento", { exact: true }).fill("Revisão sintética; não confirma intrusão.");
+      await card.getByRole("button", { name: "Guardar revisão", exact: true }).click();
+      await card.getByText("Revisão guardada no histórico.", { exact: false }).waitFor();
+      await card.getByText("Histórico de revisões (1)", { exact: true }).waitFor();
+    }
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: path.join(out, "demo-mobile-" + i + ".png") });

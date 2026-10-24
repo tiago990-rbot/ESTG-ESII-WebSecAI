@@ -8,8 +8,8 @@ from app.core.security import get_current_user
 from app.core.targets import parse_target
 from app.db.session import get_db
 from app.models.user import User
-from app.models.investigation import Investigation, ProviderRun, AIReport
-from app.schemas.investigation import InvestigationCreate, Question, RetryRequest
+from app.models.investigation import Investigation, ProviderRun, AIReport, EvidenceReview
+from app.schemas.investigation import InvestigationCreate, Question, RetryRequest, EvidenceReviewCreate
 from app.services import providers, ai_service
 from app.services.investigation_service import detail, run_investigation, run_retry
 from app.services.privacy import redact
@@ -45,7 +45,7 @@ def create(data: InvestigationCreate, tasks: BackgroundTasks, db: Session = Depe
             raise HTTPException(422, str(exc)) from exc
     else:
         target, domain = "Mensagem suspeita", ""
-    inv = Investigation(id=str(uuid.uuid4()), user_id=user.id, target=target, domain=domain, kind=data.kind, organization=redact(data.organization), options={"technical": data.technical, "product": data.product.strip()}, is_demo=data.demo, status="queued")
+    inv = Investigation(id=str(uuid.uuid4()), user_id=user.id, target=target, domain=domain, kind=data.kind, organization=redact(data.organization), options={"technical": data.technical, "product": data.product.strip(), "optional_sources": sorted(set(data.optional_sources))}, is_demo=data.demo, status="queued")
     db.add(inv)
     db.commit()
     tasks.add_task(run_investigation, inv.id, redact(data.message))
@@ -94,6 +94,29 @@ def retry(investigation_id: str, data: RetryRequest, tasks: BackgroundTasks, db:
     db.commit()
     tasks.add_task(run_retry, investigation_id, data.provider)
     return {"id": investigation_id, "provider": data.provider, "status": "queued"}
+
+@router.post("/{investigation_id}/evidence/{evidence_id}/reviews", status_code=201)
+def review_evidence(investigation_id: str, evidence_id: str, data: EvidenceReviewCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    # Lock the parent to serialize annotations with retry admission on PostgreSQL.
+    inv = db.query(Investigation).filter(Investigation.id == investigation_id, Investigation.user_id == user.id).with_for_update().first()
+    if inv is None:
+        raise HTTPException(404, "Investigação não encontrada")
+    if inv.status in {"queued", "running"}:
+        raise HTTPException(409, "Aguarde pelo fim da recolha antes de rever evidências.")
+    entry = next((entry for entry in inv.evidence if entry.id == evidence_id), None)
+    if entry is None:
+        raise HTTPException(404, "Evidência não encontrada")
+    previous = entry.reviews[-1].id if entry.reviews else None
+    if previous != data.previous_review_id:
+        raise HTTPException(409, "A revisão mudou. Atualize o dossiê antes de guardar.")
+    from app.services.evidence_reviews import fingerprint
+    from app.services.investigation_service import evidence_dict
+    snapshot = evidence_dict(entry)
+    db.add(EvidenceReview(evidence_id=entry.id, author_id=user.id, status=data.status, identity_status=data.identity_status, note=redact(data.note.strip()), evidence_hash=fingerprint(snapshot)))
+    db.commit()
+    db.expire_all()
+    return detail(owned(db, user, investigation_id))
+
 
 @router.delete("/{investigation_id}", status_code=204)
 def remove(investigation_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
@@ -144,5 +167,5 @@ def compare(investigation_id: str, db: Session = Depends(get_db), user: User = D
         return {"previous_id": None, "added": [], "removed": [], "message": "Sem investigação anterior comparável."}
     def key(e):
         return (e.provider, e.category, e.source_url, e.title, e.meta.get("cve", ""))
-    a, b = {key(e): e for e in previous.evidence if not e.meta.get("not_returned_in_latest_success")}, {key(e): e for e in inv.evidence if not e.meta.get("not_returned_in_latest_success")}
+    a, b = {key(e): e for e in previous.evidence if e.category != "kev_general" and not e.meta.get("not_returned_in_latest_success")}, {key(e): e for e in inv.evidence if e.category != "kev_general" and not e.meta.get("not_returned_in_latest_success")}
     return {"previous_id": previous.id, "added": [b[k].title for k in b.keys() - a.keys()], "removed": [a[k].title for k in a.keys() - b.keys()], "message": "Diferenças entre evidências recolhidas. Alterações de cobertura podem explicar os resultados."}

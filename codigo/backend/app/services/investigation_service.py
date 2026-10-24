@@ -14,16 +14,23 @@ from app.services.coverage import summarize_coverage, target_evidence
 from app.services.incident_groups import candidate_groups
 from app.services.intelligence import technical_records
 from app.services.demo_report import demo_analysis
+from app.services.source_policy import selected_optional
+from app.services import passive_sources
 
 _worker_slots = threading.Semaphore(2)
 RETRY_STATUSES = {"error", "partial", "not_configured", "access_denied", "rate_limited", "interrupted", "stale"}
-RETRY_SOURCES = {"technical", "urlhaus", "phishtank", "osint", "exposure", "kev", "ai"}
+RETRY_SOURCES = {"hibp_catalog", "urlscan", "technical", "urlhaus", "phishtank", "osint", "exposure", "kev", "ai"}
 
 def iso(date):
     return date.replace(tzinfo=date.tzinfo or timezone.utc).isoformat() if date else None
 
 def evidence_dict(e):
-    return {k: getattr(e, k) for k in ("id", "provider", "category", "title", "description", "source_url", "confirmation", "published_at", "event_at", "meta")} | {"observed_at": iso(e.observed_at)}
+    from app.services.evidence_reviews import serialize
+    result = {k: getattr(e, k) for k in ("id", "provider", "category", "title", "description", "source_url", "confirmation", "published_at", "event_at", "meta")} | {"observed_at": iso(e.observed_at)}
+    if e.reviews:
+        result["reviews"] = [serialize(review, result) for review in e.reviews]
+        result["review"] = result["reviews"][-1]
+    return result
 
 def detail(inv):
     evidence = [evidence_dict(e) for e in inv.evidence if not e.meta.get("not_returned_in_latest_success")]
@@ -31,7 +38,7 @@ def detail(inv):
     runs = [{"provider": r.provider, "status": r.status, "message": r.message, "results_count": r.results_count, "observed_at": iso(r.observed_at)} for r in inv.runs]
     digest = ai_service.context_hash(evidence, runs)
     reports = [{"id": r.id, "model": r.model, "prompt_version": r.prompt_version, "report": r.report, "created_at": iso(r.created_at), "is_current": r.evidence_hash == digest} for r in sorted(inv.reports, key=lambda r: r.id)]
-    grouping = candidate_groups(evidence, inv.domain)
+    grouping = candidate_groups([entry for entry in evidence if not (entry.get("review", {}).get("is_current") and (entry["review"]["status"] == "contested" or entry["review"]["identity_status"] == "does_not_match"))], inv.domain)
     return {"id": inv.id, "target": inv.target, "domain": inv.domain, "kind": inv.kind, "organization": inv.organization, "status": inv.status, "is_demo": inv.is_demo, "created_at": iso(inv.created_at), "finished_at": iso(inv.finished_at), "technical": inv.technical, "message_analysis": inv.message_analysis, "runs": runs, "evidence": evidence, "previous_evidence": previous, "reports": reports, "coverage_summary": summarize_coverage(evidence, runs), "incident_grouping": grouping, "retryable_providers": retryable_sources(inv, evidence, runs, reports)}
 
 
@@ -51,7 +58,7 @@ def source_links(inv):
 def applicable_sources(inv):
     names = {"kev", "ai"}
     if source_links(inv):
-        names.update({"urlhaus", "phishtank", "osint", "exposure"})
+        names.update({"urlhaus", "osint"} | selected_optional(inv.options))
     if inv.kind == "domain" and inv.options.get("technical"):
         names.add("technical")
     return names
@@ -185,6 +192,9 @@ def run_investigation(inv_id: str, message: str = ""):
                         db.commit()
                 persist_result(inv_id, "message", providers.Result("success", signals["limitation"], [providers.item("message_signal", "Sinal linguístico: " + s["code"], s["description"], confirmation="unverified") for s in signals["signals"]]))
             for name, function in [("urlhaus", providers.urlhaus), ("phishtank", providers.phishtank)]:
+                if name == "phishtank" and name not in selected_optional(options):
+                    persist_result(inv_id, name, providers.Result("not_requested", "Fonte opcional não selecionada. Não foi feita consulta."))
+                    continue
                 if not links:
                     persist_result(inv_id, name, providers.Result("not_requested", "Sem URLs públicos válidos na mensagem."))
                     continue
@@ -202,10 +212,13 @@ def run_investigation(inv_id: str, message: str = ""):
                 persist_result(inv_id, name, combined)
             if links:
                 persist_result(inv_id, "osint", providers.guarded(providers.osint, links[0], organization))
-                persist_result(inv_id, "exposure", providers.guarded(providers.exposure, parse_target(links[0]).host))
+                persist_result(inv_id, "exposure", providers.guarded(providers.exposure, parse_target(links[0]).host) if "exposure" in selected_optional(options) else providers.Result("not_requested", "Fonte opcional não selecionada. Não foi feita consulta."))
             else:
                 persist_result(inv_id, "osint", providers.Result("not_requested", "Sem alvo público para pesquisa."))
                 persist_result(inv_id, "exposure", providers.Result("not_requested", "Sem domínio para consulta."))
+            for name, function in [("hibp_catalog", passive_sources.hibp_catalog), ("urlscan", passive_sources.urlscan)]:
+                result = providers.guarded(function, links[0]) if links and name in selected_optional(options) else providers.Result("not_requested", "Fonte opcional não selecionada ou sem alvo público. Não foi feita consulta.")
+                persist_result(inv_id, name, result)
             persist_result(inv_id, "kev", providers.guarded(providers.kev, options.get("product", "")))
             with SessionLocal() as db:
                 inv = db.get(Investigation, inv_id)
@@ -259,6 +272,8 @@ def retry_source_result(inv_id, provider, inv):
         return providers.guarded(providers.kev, inv.options.get("product", ""))
     if provider == "osint":
         return providers.guarded(providers.osint, links[0], inv.organization)
+    if provider in {"hibp_catalog", "urlscan"}:
+        return providers.guarded(getattr(passive_sources, provider), links[0])
     if provider == "exposure":
         return providers.guarded(providers.exposure, parse_target(links[0]).host)
     function = {"urlhaus": providers.urlhaus, "phishtank": providers.phishtank}[provider]

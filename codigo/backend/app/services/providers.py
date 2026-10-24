@@ -32,14 +32,18 @@ def json_request(method: str, url: str, **kwargs):
     # All caller URLs are fixed provider endpoints, never user-selected hosts.
     with httpx.Client(timeout=httpx.Timeout(12, connect=5), follow_redirects=False, trust_env=False) as client:
         with client.stream(method, url, **kwargs) as response:
-            if response.status_code == 429:
-                raise SourceError("rate_limited", "Quota ou frequência da fonte atingida.")
+            if response.status_code in {429, 509}:
+                raw_wait = response.headers.get("Retry-After", "60")
+                wait = min(int(raw_wait), 86400) if raw_wait.isdigit() else 60
+                raise SourceError("rate_limited", "Quota ou frequência da fonte atingida.", {"retry_after_seconds": max(1, wait)})
             if response.status_code == 509:
                 raise SourceError("rate_limited", "Frequência da fonte atingida. Aguarde antes de repetir.")
             if response.status_code in {401, 403}:
                 raise SourceError("access_denied", "Acesso recusado pela fonte; confirme chave, plano e permissões.")
             if response.status_code == 404:
-                raise SourceError("no_results", "A fonte não devolveu correspondências para a consulta.")
+                if url.startswith("https://haveibeenpwned.com/api/v3/breachedDomain/"):
+                    raise SourceError("no_results", "A fonte não devolveu correspondências para esta consulta de domínio verificado.")
+                raise SourceError("error", "O fornecedor devolveu HTTP 404. Não comprova autenticação nem uma consulta válida sem correspondências.")
             if response.status_code != 200:
                 # Never relay an error body: it can contain prompts, generated text or credentials.
                 reason = ""
@@ -92,8 +96,8 @@ def json_request(method: str, url: str, **kwargs):
                     raise SourceError("error", "Resposta da fonte excedeu o limite de tamanho.")
             return json.loads(body)
 
-def reserve(provider: str, limit: int, daily=False):
-    period = datetime.now(timezone.utc).strftime("%Y-%m-%d" if daily else "%Y-%m")
+def reserve(provider: str, limit: int, daily=False, minute=False):
+    period = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M" if minute else "%Y-%m-%d" if daily else "%Y-%m")
     try:
         limit = restricted_limit(value("WEBSECAI_REQUEST_WINDOW_FILE"), provider, period, limit)
     except (OSError, ValueError, KeyError, TypeError, StopIteration):
@@ -109,6 +113,27 @@ def reserve(provider: str, limit: int, daily=False):
         db.commit()
         if not changed:
             raise SourceError("rate_limited", "Limite local de pedidos atingido; não foi efetuada nova chamada.")
+
+def reserve_acceptance(provider):
+    """Optional initial acceptance gate, durable in PostgreSQL, at most two reservations."""
+    if value("TI_ACCEPTANCE_ENABLED", "false").lower() != "true":
+        return
+    period = value("TI_ACCEPTANCE_ID", "20261024")
+    if not re.fullmatch(r"[0-9]{8}", period) or provider not in {"tavily", "groq", "urlhaus"}:
+        raise SourceError("rate_limited", "Janela inicial de validação inválida. Não foi feita chamada.")
+    name = "acceptance_" + provider
+    with SessionLocal() as db:
+        if db.get(Usage, (name, period)) is None:
+            db.add(Usage(provider=name, period=period, count=0))
+            try:
+                db.commit()
+            except IntegrityError:
+                db.rollback()
+        changed = db.execute(update(Usage).where(Usage.provider == name, Usage.period == period, Usage.count < 2).values(count=Usage.count + 1)).rowcount
+        db.commit()
+        if not changed:
+            raise SourceError("rate_limited", "Orçamento inicial de duas consultas atingido. Não foi feita nova chamada; não reiniciar a janela automaticamente.")
+
 
 def source_link(raw: str) -> str:
     try:
@@ -156,6 +181,7 @@ def urlhaus(target: str) -> Result:
     host_mode = urlsplit(target).path in {"", "/"}
     endpoint = "host" if host_mode else "url"
     data = {"host": parsed.host} if host_mode else {"url": parsed.url}
+    reserve_acceptance("urlhaus")
     payload = json_request("POST", f"https://urlhaus-api.abuse.ch/v1/{endpoint}/", data=data, headers={"Auth-Key": key, "User-Agent": "WebSecAI/0.1"})
     status = payload.get("query_status")
     if status in {"no_results", "no_result"}:
@@ -173,7 +199,8 @@ def urlhaus(target: str) -> Result:
 def phishtank(target: str) -> Result:
     key = value("PHISHTANK_API_KEY")
     if not key:
-        return Result("not_configured", "Fonte opcional sem chave nesta instalação. Novos registos PhishTank estão temporariamente suspensos; a consulta sem chave, limitada pelo fornecedor, ainda não está ativada aqui.")
+        from app.services.passive_sources import anonymous_phishtank
+        return anonymous_phishtank(target)
     data = json_request("POST", "https://checkurl.phishtank.com/checkurl/", data={"url": target, "format": "json", "app_key": key}, headers={"User-Agent": "phishtank/websecai"})
     result = data.get("results", {})
     if not result.get("in_database"):
@@ -192,7 +219,8 @@ def osint(target: str, organization: str) -> Result:
     failure = None
     for query in queries:
         try:
-            reserve("tavily", number("SEARCH_MONTHLY_LIMIT", 800))
+            reserve("tavily", number("SEARCH_MONTHLY_LIMIT", 200))
+            reserve_acceptance("tavily")
             data = json_request("POST", "https://api.tavily.com/search", headers={"Authorization": "Bearer " + key}, json={"query": query, "search_depth": "basic", "max_results": 5, "include_answer": False, "include_raw_content": False})
             for result in data.get("results", [])[:5]:
                 url = source_link(result.get("url", ""))
@@ -269,7 +297,7 @@ def exposure(domain: str) -> Result:
 def configuration():
     rows = [
         {"id": "urlhaus", "name": "URLhaus", "configured": bool(value("URLHAUS_AUTH_KEY")), "purpose": "URLs associadas a malware"},
-        {"id": "phishtank", "name": "PhishTank", "configured": bool(value("PHISHTANK_API_KEY")), "purpose": "Consulta de phishing por URL exato"},
+        {"id": "phishtank", "name": "PhishTank", "configured": bool(value("PHISHTANK_API_KEY")) or (value("PHISHTANK_ANONYMOUS_ENABLED", "false").lower() == "true" and number("PHISHTANK_DAILY_LIMIT", 0) > 0), "purpose": "Consulta de phishing por URL exato"},
         {"id": "osint", "name": "Pesquisa pública", "configured": bool(value("TAVILY_API_KEY")), "purpose": "Notícias, fóruns e relatórios via Tavily"},
         {"id": "kev", "name": "CISA KEV", "configured": True, "purpose": "Alertas gerais de exploração conhecida; sem chave"},
         {"id": "ai", "name": "Assistente IA", "configured": bool(value("GROQ_API_KEY")), "purpose": "Síntese por Groq com referências"},
@@ -277,8 +305,8 @@ def configuration():
         {"id": "intelx", "name": "Intelligence X", "configured": False, "purpose": "Extensão condicionada a licença; sem integração ativa"},
     ]
     requirements = {
-        "urlhaus": ("account_key", "Opcional: requer conta e Auth-Key no URLhaus. Existe acesso gratuito sujeito às condições do fornecedor.", "https://urlhaus-api.abuse.ch/"),
-        "phishtank": ("account_key", "Opcional: esta integração usa uma chave. Novos registos estão suspensos; o modo sem chave documentado pelo fornecedor ainda não está ativado aqui.", "https://phishtank.org/api_info.php"),
+        "urlhaus": ("account_key", "Requer conta e Auth-Key no URLhaus. Existe acesso gratuito sujeito às condições do fornecedor.", "https://urlhaus-api.abuse.ch/"),
+        "phishtank": ("account_key", "Opcional: chave existente ou modo anónimo explicitamente ativado, limitado e sujeito a cache. Sem ativação não há consultas.", "https://phishtank.org/api_info.php"),
         "osint": ("account_key", "Conta Tavily e chave privada. Pesquisas limitadas pela quota local e pelo plano escolhido.", "https://docs.tavily.com/documentation/api-credits"),
         "kev": ("none", "Catálogo público, sem conta. Os alertas gerais não comprovam um ataque ao domínio.", "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"),
         "ai": ("account_key", "Conta Groq e chave privada. A existência da configuração não comprova a qualidade das respostas.", "https://console.groq.com/docs/quickstart"),
@@ -287,5 +315,14 @@ def configuration():
     }
     for row in rows:
         requirement, note, documentation = requirements[row["id"]]
-        row.update(implemented=row["id"] != "intelx", access_requirement=requirement, setup_note=note, documentation_url=documentation)
+        group = {"urlhaus": "essential", "osint": "essential", "ai": "analysis", "kev": "context", "intelx": "future"}.get(row["id"], "optional")
+        limit = number("SEARCH_MONTHLY_LIMIT", 200) if row["id"] == "osint" else number("AI_DAILY_LIMIT", 10) if row["id"] == "ai" else 1
+        row.update(implemented=row["id"] != "intelx", group=group, ready=row["configured"] and limit > 0, access_requirement=requirement, setup_note=note, documentation_url=documentation)
+        if row["id"] in {"ai", "osint"}:
+            row.update(local_limit=limit, limit_period="day_utc" if row["id"] == "ai" else "month_utc", shared_limit=True)
+    for name, label, configured, note, docs in [
+        ("hibp_catalog", "HIBP — metadados públicos", number("HIBP_CATALOG_DAILY_LIMIT", 0) > 0, "Catálogo público de fugas por website, sem emails nem passwords. Distinto da API paga de contas de domínios verificados. Limite local obrigatório.", "https://haveibeenpwned.com/API/v3"),
+        ("urlscan", "urlscan — pesquisa passiva", bool(value("URLSCAN_API_KEY")) and number("URLSCAN_DAILY_LIMIT", 0) > 0, "Apenas scans públicos existentes; nunca submete um novo scan. Chave e quotas Free a confirmar antes de ativar.", "https://docs.urlscan.io/pages/search-api-reference"),
+    ]:
+        rows.append(dict(id=name, name=label, configured=configured, ready=configured, purpose=note, group="optional", implemented=True, access_requirement="key_and_free_quota" if name == "urlscan" else "public_catalogue_opt_in", setup_note=note, documentation_url=docs))
     return rows

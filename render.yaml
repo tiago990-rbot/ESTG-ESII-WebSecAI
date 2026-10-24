@@ -28,6 +28,6 @@ services:
       - key: ALLOW_DEMO
         value: "true"
       - key: SEARCH_MONTHLY_LIMIT
-        value: "0"
+        value: "200"
       - key: AI_DAILY_LIMIT
-        value: "0"
+        value: "10"

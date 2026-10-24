@@ -72,6 +72,20 @@ def relation(entry):
     return "Referência recolhida", False
 
 
+def balanced_pages(entries, maximum=12):
+    """Preserve order; avoid almost empty final map pages."""
+    if maximum < 1:
+        raise ValueError("A capacidade da página tem de ser positiva.")
+    count = max(1, (len(entries) + maximum - 1) // maximum)
+    size, extra = divmod(len(entries), count)
+    pages, start = [], 0
+    for index in range(count):
+        end = start + size + (index < extra)
+        pages.append(entries[start:end])
+        start = end
+    return pages
+
+
 def graph_data(entries, limit=24):
     """Balanced collection view. Edges do not assert association or causality."""
     buckets = defaultdict(deque)

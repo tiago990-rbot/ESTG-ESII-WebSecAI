@@ -38,6 +38,7 @@ class ProviderRun(Base):
 
 class Evidence(Base):
     __tablename__ = "evidence"
+    reviews: Mapped[list["EvidenceReview"]] = relationship(cascade="all, delete-orphan", lazy="selectin", order_by="EvidenceReview.id")
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     investigation_id: Mapped[str] = mapped_column(ForeignKey("investigations.id", ondelete="CASCADE"), index=True)
     provider: Mapped[str] = mapped_column(String(40))
@@ -50,6 +51,19 @@ class Evidence(Base):
     event_at: Mapped[str | None] = mapped_column(String(60), nullable=True)
     observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     meta: Mapped[dict] = mapped_column(JSON, default=dict)
+
+class EvidenceReview(Base):
+    __tablename__ = "evidence_reviews"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    evidence_id: Mapped[str] = mapped_column(ForeignKey("evidence.id", ondelete="CASCADE"), index=True)
+    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    status: Mapped[str] = mapped_column(String(20))
+    identity_status: Mapped[str] = mapped_column(String(20))
+    note: Mapped[str] = mapped_column(Text, default="")
+    evidence_hash: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    author = relationship("User", lazy="selectin")
+
 
 class AIReport(Base):
     __tablename__ = "ai_reports"

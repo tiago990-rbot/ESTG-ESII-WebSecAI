@@ -8,7 +8,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, CondPageBreak, Table, TableStyle, KeepTogether
 from app.services.intelligence import QUESTIONS, CONFIDENCE, JUDGEMENT, CORRELATION, ASSESSMENT, safe_source
-from app.services.investigation_pdf_visuals import TimelineVisual, ModuleVolumeVisual, RelationVisual, graph_data
+from app.services.investigation_pdf_visuals import TimelineVisual, ModuleVolumeVisual, RelationVisual, graph_data, balanced_pages
 
 INK = colors.HexColor("#112b38")
 TEAL = colors.HexColor("#147b73")
@@ -16,7 +16,7 @@ MUTED = colors.HexColor("#556c77")
 PALE = colors.HexColor("#eff6f5")
 LINE = colors.HexColor("#d7e2e5")
 AMBER = colors.HexColor("#805822")
-PROVIDERS = {"osint": "Pesquisa pública", "technical": "Verificações técnicas", "urlhaus": "URLhaus", "phishtank": "PhishTank", "kev": "CISA KEV", "exposure": "Exposição de dados", "ai": "Síntese IA", "message": "Regras da mensagem"}
+PROVIDERS = {"osint": "Pesquisa pública", "technical": "Verificações técnicas", "urlhaus": "URLhaus", "phishtank": "PhishTank", "kev": "CISA KEV", "exposure": "Exposição de dados", "ai": "Síntese IA", "message": "Regras da mensagem", "hibp_catalog": "HIBP — metadados públicos", "urlscan": "urlscan — pesquisa passiva"}
 STATUS = {"completed": "Concluída", "partial": "Parcial", "running": "Em curso", "queued": "Em fila", "interrupted": "Interrompida", "error": "Erro", "success": "Consultada", "no_results": "Sem correspondências", "demo": "Demonstração", "not_configured": "Sem acesso", "not_requested": "Não solicitada", "rate_limited": "Quota atingida", "access_denied": "Acesso recusado", "stale": "Síntese desatualizada", "unverified": "Por verificar", "allegation": "Alegação", "reported": "Reportado pela fonte", "known_exploited": "Exploração conhecida"}
 
 def date_label(value):
@@ -154,6 +154,7 @@ def investigation_pdf(snapshot: dict) -> bytes:
         score += " (anterior)"
     rows = [[str(len(entries)) + " evidências atuais", score, "Atual" if current else "Anterior" if latest else "Indisponível"]]
     table(["EVIDÊNCIAS", "POSTURA TÉCNICA", "SÍNTESE"], rows, [content_width / 3] * 3)
+    add("Referências atuais por dimensão: " + str(sum(entry.get("provider") == "technical" for entry in entries)) + " técnicas; " + str(sum(entry.get("provider") in {"osint", "hibp_catalog"} for entry in entries)) + " de pesquisa pública; " + str(sum(entry.get("category") == "kev_general" for entry in entries)) + " de contexto global KEV. São referências, não contagens de incidentes.", "small")
     add("Resumo executivo", "h2")
     if current:
         add(current["report"]["summary"])
@@ -193,7 +194,9 @@ def investigation_pdf(snapshot: dict) -> bytes:
 
     section("02", "As perguntas essenciais")
     answers = {answer["key"]: answer for answer in analysis["questions"]} if analysis else {}
-    for number, (key, question) in enumerate(QUESTIONS.items(), 1):
+    if not analysis:
+        add("Sem respostas estruturadas atuais. Permanecem por avaliar: " + " / ".join(QUESTIONS.values()), "small")
+    for number, (key, question) in enumerate(QUESTIONS.items() if analysis else [], 1):
         start = len(story)
         add(f"{number:02d}. " + question, "question")
         if key in answers:
@@ -280,22 +283,24 @@ def investigation_pdf(snapshot: dict) -> bytes:
 
     section("06", "Cronologia das evidências", new_page=True)
     add("Três datas independentes, mais recentes no topo. A publicação não substitui a data do incidente; a consulta indica apenas quando o resultado foi recolhido.")
-    if entries:
-        timeline = TimelineVisual(content_width, entries, index)
+    related = [entry for entry in entries if entry.get("category") != "kev_general"]
+    if related:
+        timeline = TimelineVisual(content_width, related, index)
         story.append(timeline)
         story.append(Spacer(1, 14))
         add("Leitura: ordem temporal com espaçamento uniforme, sem escala de duração. Até cinco datas por coluna e seis referências por data; as restantes e todas as datas desconhecidas estão no anexo. Clique em E# para consultar a evidência.", "small")
         if timeline.height <= 260:
             add("Volume de referências por módulo", "h2")
-            story.append(ModuleVolumeVisual(content_width, entries))
+            story.append(ModuleVolumeVisual(content_width, related))
             add("Contagem de evidências atuais, não de incidentes ou de fontes independentes. Mais referências não significam maior risco nem maior confiança.", "small")
     else:
         note("Sem evidências atuais para representar. Não foram inventados eventos ou datas; resultados anteriores, quando existem, permanecem no anexo.")
     if previous:
         add(str(len(previous)) + " evidência(s) anterior(es) fora desta cronologia; consultar o anexo.", "small")
 
-    visual = graph_data(entries)
-    pages = [visual["entries"][start:start + 12] for start in range(0, len(visual["entries"]), 12)] or [[]]
+    related = [entry for entry in entries if entry.get("category") != "kev_general"]
+    visual = graph_data(related)
+    pages = balanced_pages(visual["entries"])
     for page_number, page_entries in enumerate(pages, 1):
         section("07", "Mapa de relações" + (" / " + str(page_number) + " de " + str(len(pages)) if len(pages) > 1 else ""), new_page=True)
         add("Mapa de proveniência: dossiê, módulos consultados e referências guardadas. As ligações representam recolha, não causalidade, confirmação independente ou um ataque ao alvo.")
@@ -309,6 +314,14 @@ def investigation_pdf(snapshot: dict) -> bytes:
             add(str(visual["omitted"]) + " referências adicionais no anexo. O mapa seleciona até 24, por alternância de módulos, para preservar legibilidade.", "small")
         add("As correlações interpretativas, quando disponíveis e atuais, estão na secção 01 com confiança, ressalvas e referências. Resultados anteriores do anexo não são acrescentados silenciosamente ao mapa.", "small")
 
+    general = [entry for entry in entries if entry.get("category") == "kev_general"]
+    if general:
+        add("Contexto global CISA KEV — sem associação demonstrada ao alvo", "h2")
+        add("Estes alertas gerais ficam fora do mapa e da cronologia do alvo. Não demonstram produto em uso, versão afetada ou ataque.")
+        for entry in general:
+            add(entry["title"])
+            refs([entry["id"]])
+
     section("08", "Anexo de evidências e datas", new_page=True)
     add("As referências [E#] remetem para este anexo. A numeração é a mesma da aplicação. Resultados anteriores estão identificados e não integram a contagem atual.")
     if not entries and not previous:
@@ -318,7 +331,15 @@ def investigation_pdf(snapshot: dict) -> bytes:
         number = index[entry["id"]]
         story.append(Paragraph(f'<a name="evidence-E{number}"/>E{number} / ' + escape(entry["title"]), styles["h2"]))
         add(PROVIDERS.get(entry["provider"], entry["provider"]) + " | " + STATUS.get(entry.get("confirmation"), entry.get("confirmation", "Por verificar")), "label")
+        if entry.get("review"):
+            review = entry["review"]
+            add("Revisão humana: " + {"unreviewed": "Por rever", "reviewed": "Revista", "contested": "Contestada"}.get(review["status"], review["status"]) + " | Autor: " + review["author"] + " | " + date_label(review["created_at"]), "small")
+            add("Identidade: " + {"unverified": "Por verificar", "matches": "Correspondência apreciada pelo autor", "does_not_match": "Não corresponde", "uncertain": "Incerta"}.get(review["identity_status"], review["identity_status"]), "small")
+            add(review["note"], "small")
+            add("Anotação humana, não confirmação independente de intrusão. " + ("A evidência mudou desde esta revisão." if not review["is_current"] else "") + " Histórico completo disponível na aplicação.", "small")
         meta = entry.get("meta", {})
+        if meta.get("provider_queried_at"):
+            add("Consulta original ao fornecedor: " + date_label(meta["provider_queried_at"]) + ". O resultado pode ter sido reutilizado da cache.", "small")
         if meta.get("not_returned_in_latest_success"):
             note("RECOLHA ANTERIOR: não devolvida na última consulta concluída; não integra os resultados atuais nem prova desaparecimento da ameaça.")
         elif meta.get("retained_from_earlier_attempt"):

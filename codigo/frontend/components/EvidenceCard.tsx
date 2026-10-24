@@ -1,7 +1,8 @@
-import { Evidence, dateLabel, externalLink, statusLabel } from "@/lib/investigations";
+import EvidenceReviewForm from "./EvidenceReviewForm";
+import { Investigation, Evidence, dateLabel, externalLink, statusLabel } from "@/lib/investigations";
 import { categoryNames, providerNames, relationNames, relationOf } from "@/lib/evidence-view";
 
-export default function EvidenceCard({ entry, number }: { entry: Evidence; number: number }) {
+export default function EvidenceCard({ entry, number, investigationId, onReviewed }: { entry: Evidence; number: number; investigationId?: string; onReviewed?: (data: Investigation) => void }) {
   const source = externalLink(entry.source_url);
   const relation = relationOf(entry);
   return <article className="evidenceItem wb-evidence" id={"evidence-" + entry.id} tabIndex={-1}>
@@ -13,7 +14,9 @@ export default function EvidenceCard({ entry, number }: { entry: Evidence; numbe
     {relation === "product" ? <p className="notice">A versão e as condições da vulnerabilidade não foram confirmadas neste website.</p> : null}
     {relation === "review" ? <p className="notice">Relação com a organização por verificar. {entry.meta.matched_by === "organization_name" ? "Coincidência apenas pelo nome; pode ser outra organização. O domínio do alvo não foi identificado nesta referência." : "Esta referência pode ser irrelevante."}</p> : null}
     <dl className="evidenceDates"><div><dt>Publicação</dt><dd>{dateLabel(entry.published_at)}</dd></div><div><dt>Incidente</dt><dd>{dateLabel(entry.event_at)}</dd></div><div><dt>Consulta</dt><dd>{dateLabel(entry.observed_at)}</dd></div></dl>
+    {typeof entry.meta.provider_queried_at === "string" ? <p className="muted smallNote">Consulta original ao fornecedor: {dateLabel(entry.meta.provider_queried_at)}. O resultado pode ter sido reutilizado da cache.</p> : null}
     {typeof entry.meta.catalog_added_at === "string" ? <p className="muted smallNote">Entrada no catálogo KEV: {entry.meta.catalog_added_at}. Esta data não é a do último ataque.</p> : null}
     {source ? <a className="sourceLink" href={source} target="_blank" rel="noopener noreferrer">Consultar fonte original ↗</a> : <span className="muted smallNote">Sem ligação externa associada.</span>}
+    {investigationId && onReviewed ? <EvidenceReviewForm entry={entry} investigationId={investigationId} onReviewed={onReviewed} /> : null}
   </article>;
 }

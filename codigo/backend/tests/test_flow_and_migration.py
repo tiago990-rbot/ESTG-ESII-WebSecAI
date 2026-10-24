@@ -12,6 +12,8 @@ from app.services.intelligence import QUESTIONS
 def test_source_to_ai_protocol_and_questions(client, accounts, monkeypatch):
     for key in ("URLHAUS_AUTH_KEY", "PHISHTANK_API_KEY", "TAVILY_API_KEY", "GROQ_API_KEY"):
         monkeypatch.setenv(key, "synthetic-test-key")
+    original_reserve = providers.reserve
+    monkeypatch.setattr(providers, "reserve", lambda name, limit, **kwargs: None if name == "groq_minute" else original_reserve(name, limit, **kwargs))
     calls = []
     def external(method, url, **kwargs):
         calls.append(url)
