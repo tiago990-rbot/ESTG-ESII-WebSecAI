@@ -138,7 +138,7 @@ Na última validação registada, em **24 de outubro de 2026**:
 
 A existência de uma chave configurada não garante autenticação ou funcionamento do respetivo serviço. As integrações continuam sujeitas às permissões, quotas e disponibilidade dos fornecedores.
 
-## WBS atualizada
+## WBS 
 
 A WBS organiza os principais entregáveis e o trabalho de consolidação. Responsáveis e datas são acordados pelo grupo.
 
