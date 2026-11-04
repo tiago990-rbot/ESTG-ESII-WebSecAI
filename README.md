@@ -3,8 +3,6 @@
 Aplicação académica de **Engenharia de Software II** para análise da postura de segurança de websites e investigação de ameaças com fontes públicas.
 
 **Equipa:** Pedro Mano, Tiago Melo e Gonçalo Cordeiro  
-**Aplicação:** [WebSecAI online](https://websecai-frontend.websecai-estg.workers.dev/) · [Entrar](https://websecai-frontend.websecai-estg.workers.dev/login)  
-**Planeamento:** [Kanban do projeto](https://github.com/users/tiago990-rbot/projects/1)
 
 ## O que faz a aplicação?
 
