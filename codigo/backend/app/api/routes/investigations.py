@@ -25,7 +25,8 @@ def owned(db, user, investigation_id):
 
 @router.get("/providers")
 def provider_status(current_user: User = Depends(get_current_user)):
-    return {"providers": providers.configuration(), "demo_enabled": value("ALLOW_DEMO", "true").lower() == "true"}
+    from app.services.quotas import dashboard
+    return {"providers": dashboard(current_user)["providers"], "demo_enabled": value("ALLOW_DEMO", "true").lower() == "true"}
 
 @router.post("", status_code=202)
 def create(data: InvestigationCreate, tasks: BackgroundTasks, db: Session = Depends(get_db), user: User = Depends(get_current_user)):

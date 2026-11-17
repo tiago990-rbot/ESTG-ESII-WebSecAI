@@ -5,7 +5,7 @@ from app.core.config import token_secret, value
 from app.core.deployment import validate_deployment
 from app.db.migrate import upgrade_schema
 from app.services.investigation_service import recover_interrupted
-from app.api.routes import auth, scans, users, investigations
+from app.api.routes import auth, scans, users, investigations, quotas
 
 @asynccontextmanager
 async def lifespan(app):
@@ -21,6 +21,7 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(scans.router)
 app.include_router(investigations.router)
+app.include_router(quotas.router)
 
 @app.get("/")
 def root():

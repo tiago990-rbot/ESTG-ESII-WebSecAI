@@ -112,29 +112,27 @@ def generate(evidence: list[dict], target: str, runs: list[dict], question: str 
     if model == "qwen/qwen3.8-27b":
         payload.update(reasoning_format="hidden", reasoning_effort="none")
     # Conservative size estimate, not a model tokenizer. Provider limits still apply.
-    # A possible format fallback also reserves the minute and daily budgets.
+    # A format error does not trigger a second call in the same minute.
     while len(packed) > 1 and estimated_tokens(payload) > 7600:
         packed.pop()
         data["selection"].update(included=len(packed), omitted=len(evidence) - len(packed))
         payload["messages"][1]["content"] = json.dumps(data, ensure_ascii=False, default=str)
     if estimated_tokens(payload) > 7600:
         raise providers.SourceError("rate_limited", "Conteúdo demasiado extenso para o orçamento conservador do plano gratuito. Não foi feita chamada IA.")
-    for attempt in range(2):
-        if estimated_tokens(payload) > 7600:
-            raise providers.SourceError("rate_limited", "Formato excede o orçamento conservador do plano gratuito. Não foi feita nova chamada IA.")
-        providers.reserve("groq_minute", 1, minute=True)
-        providers.reserve("groq", number("AI_DAILY_LIMIT", 10), daily=True)
-        providers.reserve_acceptance("groq")
-        try:
-            response = providers.json_request("POST", "https://api.groq.com/openai/v1/chat/completions", headers={"Authorization": "Bearer " + value("GROQ_API_KEY")}, json=payload)
-            break
-        except providers.SourceError as exc:
-            if attempt or exc.diagnostics.get("reason") != "json_validation":
-                raise
-            # One bounded format fallback; same model, no new sources, every call reserves quota.
-            # The same Pydantic schema and evidence-ID checks still gate persistence.
-            payload["response_format"] = {"type": "json_object"}
-            payload["messages"][0]["content"] = SYSTEM + "\nJSON Schema obrigatório: " + json.dumps(_provider_schema(), ensure_ascii=False)
+    if value("GROQ_RESPONSE_FORMAT", "json_schema") == "json_object":
+        payload["response_format"] = {"type":"json_object"}
+        payload["messages"][0]["content"] = SYSTEM + "\nJSON Schema obrigatório: " + json.dumps(_provider_schema(), ensure_ascii=False)
+    if estimated_tokens(payload) > 7600:
+        raise providers.SourceError("rate_limited", "Formato excede o orçamento conservador. Não foi feita chamada IA.")
+    providers.reserve("groq_minute", 1, minute=True)
+    providers.reserve("groq", number("AI_DAILY_LIMIT", 10), daily=True)
+    providers.reserve_acceptance("groq")
+    try:
+        response = providers.json_request("POST", "https://api.groq.com/openai/v1/chat/completions", headers={"Authorization": "Bearer " + value("GROQ_API_KEY")}, json=payload)
+    except providers.SourceError as exc:
+        if exc.diagnostics.get("reason") == "json_validation":
+            raise providers.SourceError("error", "O modelo devolveu um formato inválido. Não foi feita uma segunda chamada automática. As evidências foram preservadas; uma nova tentativa, após a renovação dos limites, consome nova quota. O administrador pode selecionar GROQ_RESPONSE_FORMAT=json_object se necessário.", exc.diagnostics) from None
+        raise
     raw = json.loads(response["choices"][0]["message"]["content"])
     validated = validated_report(raw, packed)
     if validated["intelligence"] is None:

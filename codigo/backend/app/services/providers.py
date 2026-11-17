@@ -30,14 +30,24 @@ class SourceError(Exception):
 
 def json_request(method: str, url: str, **kwargs):
     # All caller URLs are fixed provider endpoints, never user-selected hosts.
+    from app.services import quotas
+    provider = {"api.groq.com":"groq", "api.tavily.com":"tavily", "urlhaus-api.abuse.ch":"urlhaus", "checkurl.phishtank.com":"phishtank", "haveibeenpwned.com":"hibp_catalog", "urlscan.io":"urlscan"}.get(urlsplit(url).hostname)
+    scope = kwargs.get("json", {}).get("model", "account") if provider == "groq" else "account"
+    if provider == "hibp_catalog" and '/breachedDomain/' in url:provider='exposure'
+    if provider:
+        tokens = 0
+        if provider == "groq":
+            from app.services.ai_service import estimated_tokens
+            tokens = estimated_tokens(kwargs["json"])
+        quotas.check_external(provider, tokens=tokens, scope=scope,metadata=method=='GET' and url=='https://api.tavily.com/usage')
     with httpx.Client(timeout=httpx.Timeout(12, connect=5), follow_redirects=False, trust_env=False) as client:
         with client.stream(method, url, **kwargs) as response:
+            if provider:
+                quotas.observe(provider, scope, response.headers, response.status_code)
             if response.status_code in {429, 509}:
                 raw_wait = response.headers.get("Retry-After", "60")
                 wait = min(int(raw_wait), 86400) if raw_wait.isdigit() else 60
                 raise SourceError("rate_limited", "Quota ou frequência da fonte atingida.", {"retry_after_seconds": max(1, wait)})
-            if response.status_code == 509:
-                raise SourceError("rate_limited", "Frequência da fonte atingida. Aguarde antes de repetir.")
             if response.status_code in {401, 403}:
                 raise SourceError("access_denied", "Acesso recusado pela fonte; confirme chave, plano e permissões.")
             if response.status_code == 404:
@@ -97,22 +107,8 @@ def json_request(method: str, url: str, **kwargs):
             return json.loads(body)
 
 def reserve(provider: str, limit: int, daily=False, minute=False):
-    period = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M" if minute else "%Y-%m-%d" if daily else "%Y-%m")
-    try:
-        limit = restricted_limit(value("WEBSECAI_REQUEST_WINDOW_FILE"), provider, period, limit)
-    except (OSError, ValueError, KeyError, TypeError, StopIteration):
-        raise SourceError("rate_limited", "Janela autorizada terminada ou orçamento inválido. Não foi efetuada nova chamada.") from None
-    with SessionLocal() as db:
-        if db.get(Usage, (provider, period)) is None:
-            db.add(Usage(provider=provider, period=period, count=0))
-            try:
-                db.commit()
-            except IntegrityError:
-                db.rollback()
-        changed = db.execute(update(Usage).where(Usage.provider == provider, Usage.period == period, Usage.count < limit).values(count=Usage.count + 1)).rowcount
-        db.commit()
-        if not changed:
-            raise SourceError("rate_limited", "Limite local de pedidos atingido; não foi efetuada nova chamada.")
+    from app.services.quotas import reserve as reserve_quota
+    return reserve_quota(provider, limit, daily=daily, minute=minute)
 
 def reserve_acceptance(provider):
     """Optional initial acceptance gate, durable in PostgreSQL, at most two reservations."""
@@ -182,6 +178,7 @@ def urlhaus(target: str) -> Result:
     endpoint = "host" if host_mode else "url"
     data = {"host": parsed.host} if host_mode else {"url": parsed.url}
     reserve_acceptance("urlhaus")
+    reserve("urlhaus",number("URLHAUS_DAILY_LIMIT",20),daily=True)
     payload = json_request("POST", f"https://urlhaus-api.abuse.ch/v1/{endpoint}/", data=data, headers={"Auth-Key": key, "User-Agent": "WebSecAI/0.1"})
     status = payload.get("query_status")
     if status in {"no_results", "no_result"}:
@@ -201,6 +198,9 @@ def phishtank(target: str) -> Result:
     if not key:
         from app.services.passive_sources import anonymous_phishtank
         return anonymous_phishtank(target)
+    if number('PHISHTANK_DAILY_LIMIT',0)<=0:return Result('not_configured','PhishTank desativado pelo limite interno, mesmo existindo chave.')
+    reserve('phishtank',number('PHISHTANK_DAILY_LIMIT',0),daily=True)
+    reserve('phishtank_minute',1,minute=True)
     data = json_request("POST", "https://checkurl.phishtank.com/checkurl/", data={"url": target, "format": "json", "app_key": key}, headers={"User-Agent": "phishtank/websecai"})
     result = data.get("results", {})
     if not result.get("in_database"):
@@ -259,6 +259,7 @@ def kev_catalog():
         if age is not None and age < 86400:
             return json.loads(cache.read_text(encoding="utf-8")), True, datetime.fromtimestamp(cache.stat().st_mtime, timezone.utc).isoformat()
         try:
+            reserve('kev',number('KEV_DAILY_LIMIT',5),daily=True)
             data = json_request("GET", "https://raw.githubusercontent.com/cisagov/kev-data/main/known_exploited_vulnerabilities.json")
             if not isinstance(data.get("vulnerabilities"), list):
                 raise SourceError()
@@ -286,6 +287,8 @@ def exposure(domain: str) -> Result:
     allowed = {name.strip().lower() for name in value("HIBP_VERIFIED_DOMAINS").split(",") if name.strip()}
     if not value("HIBP_API_KEY") or domain not in allowed:
         return Result("not_configured", "Fonte opcional condicionada: consultar contas expostas exige subscrição HIBP e comprovar o controlo do domínio. Notícias públicas continuam disponíveis pela pesquisa.")
+    if number('HIBP_VERIFIED_DAILY_LIMIT',0)<=0:return Result('not_configured','Consulta de contas de domínio verificado desativada por limite interno. Catálogo público independente.')
+    reserve('exposure',number('HIBP_VERIFIED_DAILY_LIMIT',0),daily=True)
     data = json_request("GET", "https://haveibeenpwned.com/api/v3/breachedDomain/" + quote(domain, safe=""), headers={"hibp-api-key": value("HIBP_API_KEY"), "User-Agent": "WebSecAI/0.1"})
     breaches = {}
     for names in data.values():

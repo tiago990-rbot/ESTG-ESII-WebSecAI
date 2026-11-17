@@ -3,6 +3,7 @@ import NavBar from "@/components/NavBar";
 import { AuthConfigurationProvider } from "@/components/AuthConfiguration";
 import "./globals.css";
 import "./workbench.css";
+import "./security-lab.css";
 
 export const metadata: Metadata = {
   title: "WebSecAI",
