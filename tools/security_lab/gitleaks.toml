@@ -1,0 +1,8 @@
+title = "WebSecAI controlled static review"
+[extend]
+useDefault = true
+[[rules]]
+id = "websecai-synthetic-fixture"
+description = "Intentionally fictitious test marker, not a real credential"
+regex = '''WSAI_FIXTURE_[A-Z0-9]{20}'''
+keywords = ["WSAI_FIXTURE_"]

@@ -1,0 +1,19 @@
+rules:
+  - id: websecai.python.sql-string
+    languages: [python]
+    severity: WARNING
+    message: SQL concatenado ou interpolado. Rever origem dos dados e usar parametros.
+    patterns:
+      - pattern-either:
+          - pattern: $DB.execute($A + $B, ...)
+          - pattern: $DB.execute(f"...", ...)
+  - id: websecai.python.shell-true
+    languages: [python]
+    severity: WARNING
+    message: Chamada subprocess com shell=True. Rever entrada e preferir argumentos sem shell.
+    pattern: subprocess.$FUNC(..., shell=True, ...)
+  - id: websecai.javascript.eval
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: Avaliacao dinamica de codigo. Rever origem e eliminar execucao de entrada nao confiavel.
+    pattern: eval(...)

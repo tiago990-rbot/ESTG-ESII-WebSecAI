@@ -44,6 +44,7 @@ export default function NavBar() {
             <Link href="/dashboard" aria-current={pathname === "/dashboard" ? "page" : undefined}>Análise técnica</Link>
             <Link href="/history" aria-current={pathname.startsWith("/history") ? "page" : undefined}>Histórico técnico</Link>
             <Link href="/usage" aria-current={pathname === "/usage" ? "page" : undefined}>Limites</Link>
+            <Link href="/security-lab" aria-current={pathname.startsWith("/security-lab") ? "page" : undefined}>Security Lab</Link>
             <Link href="/profile" aria-current={pathname === "/profile" ? "page" : undefined}>Perfil</Link>
             <Link href="/about" aria-current={pathname === "/about" ? "page" : undefined}>Sobre</Link>
             <button className="linkButton" onClick={logout}>Sair</button>

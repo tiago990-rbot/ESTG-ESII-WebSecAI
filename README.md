@@ -24,7 +24,15 @@ As verificações técnicas destinam-se apenas a websites próprios ou autorizad
 - Adaptadores de Threat Intelligence e pesquisa pública, dependentes de configuração e acesso do fornecedor.
 - Síntese e perguntas apoiadas por IA, com referências a evidências e rejeição de saídas inválidas.
 
-As chaves externas são opcionais por módulo. URLhaus tem adaptador e formulário local; a aceitação ao vivo nesta instalação ainda está pendente. MCP, grafos e uma funcionalidade própria de alteração de password não estão implementados.
+As chaves externas são opcionais por módulo. A interface distingue configuração, consultas observadas e bloqueios de quota; configurar não comprova aceitação ao vivo. Há mapas de relações, cronologia e gráficos nas investigações/PDFs, além de alteração/ativação/recuperação das passwords das contas. Uma funcionalidade de verificar passwords em fugas e um servidor MCP próprio continuam por implementar.
+
+## Incrementos locais de 30/10/2026
+
+- `/usage`: limites internos partilhados, reservas, renovação, observações seguras de limites externos e exceções administrativas +1 com auditoria. Consulta opcional de saldo Tavily exige opt-in e ação administrativa distinta.
+- `/security-lab`: revisão estática de código autorizado, importação Semgrep/OSV/Gitleaks, revisão independente do código por IA, correlação separada de achados, revisão humana e PDF com visuais. Desativado por defeito até configurar `SECURITY_LAB_ENABLED`.
+- `tools/security_lab`: runner manual separado e fixtures fictícias. Não executa código recebido nem funciona como serviço público/sandbox.
+
+Consultar [o guia de integração](docs/CONTINUAR_AQUI_2026-10-30.md), [a validação local](docs/VALIDACAO_LOCAL_2026-10-30.md) e [o texto de passagem ao colega](docs/MENSAGEM_PARA_GPT_COLEGA_2026-10-30.md). Estes incrementos não foram publicados nesta sessão. Limites externos em falta permanecem desconhecidos; outras aplicações e quotas do alojamento exigem consulta do responsável. Nenhum pagamento, push ou teste ativo público foi efetuado.
 
 ## Tecnologias e estrutura
 

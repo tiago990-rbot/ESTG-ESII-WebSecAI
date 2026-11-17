@@ -28,6 +28,8 @@ for key in ("TAVILY_API_KEY", "GROQ_API_KEY", "URLHAUS_AUTH_KEY", "PHISHTANK_API
 for key in ("PHISHTANK_DAILY_LIMIT", "HIBP_CATALOG_DAILY_LIMIT", "URLSCAN_DAILY_LIMIT"):
     os.environ[key] = "0"
 from fastapi.testclient import TestClient
+for key in ('SECURITY_LAB_ENABLED','PROVIDER_USAGE_SYNC_ENABLED','QUOTA_ADMIN_USER_IDS'):
+    os.environ[key]=''
 from app.main import app
 from app.db.base import Base
 from app.db.session import engine
